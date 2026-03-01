@@ -29,16 +29,14 @@ export default async function SessionPage({ params }: SessionPageProps) {
 
   // Fetch which questions have been answered
   const questionIds = (questions || []).map((q) => q.id);
-  let answeredQuestionIds: string[] = [];
-
-  if (questionIds.length > 0) {
-    const { data: answers } = await supabase
-      .from("answers")
-      .select("question_id")
-      .in("question_id", questionIds);
-
-    answeredQuestionIds = (answers || []).map((a) => a.question_id);
-  }
+  const answeredQuestionIds =
+    questionIds.length > 0
+      ? await supabase
+          .from("answers")
+          .select("question_id")
+          .in("question_id", questionIds)
+          .then(({ data }) => (data || []).map((a) => a.question_id))
+      : [];
 
   return (
     <div className="mx-auto max-w-4xl">
