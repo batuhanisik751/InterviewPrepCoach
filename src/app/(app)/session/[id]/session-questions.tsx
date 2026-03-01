@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { QuestionCard } from "@/components/features/QuestionCard";
+import { WeakPointsList } from "@/components/features/WeakPointsList";
 import { Spinner } from "@/components/ui/Spinner";
-import type { QuestionType, Difficulty } from "@/types";
+import type { QuestionType, Difficulty, WeakPoint } from "@/types";
 
 interface QuestionRow {
   id: string;
@@ -19,6 +20,7 @@ interface SessionQuestionsProps {
   initialStatus: string;
   initialQuestions: QuestionRow[];
   answeredQuestionIds: string[];
+  initialWeakPoints: WeakPoint[] | null;
 }
 
 export function SessionQuestions({
@@ -26,8 +28,10 @@ export function SessionQuestions({
   initialStatus,
   initialQuestions,
   answeredQuestionIds,
+  initialWeakPoints,
 }: SessionQuestionsProps) {
   const [questions] = useState<QuestionRow[]>(initialQuestions);
+  const [weakPoints, setWeakPoints] = useState<WeakPoint[] | null>(initialWeakPoints);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +41,23 @@ export function SessionQuestions({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function detectWeakPoints() {
+    try {
+      const res = await fetch("/api/weakpoints/detect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setWeakPoints(data.weak_points);
+      }
+    } catch {
+      // Weak point detection is non-blocking — don't fail the session
+    }
+  }
 
   async function generateQuestions() {
     setLoading(true);
@@ -56,6 +77,8 @@ export function SessionQuestions({
         return;
       }
 
+      // Trigger weak point detection in parallel, then reload
+      await detectWeakPoints();
       window.location.reload();
     } catch {
       setError("Network error. Please try again.");
@@ -101,6 +124,10 @@ export function SessionQuestions({
 
   return (
     <div className="flex flex-col gap-4">
+      {weakPoints && weakPoints.length > 0 && (
+        <WeakPointsList weakPoints={weakPoints} />
+      )}
+
       <p className="text-sm text-muted">
         {answeredCount} of {questions.length} questions answered
       </p>

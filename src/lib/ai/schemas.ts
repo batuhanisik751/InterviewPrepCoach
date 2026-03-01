@@ -66,3 +66,27 @@ export const starAnalysisSchema = z.object({
     .array(z.string())
     .describe("Specific tips for improving the STAR structure of this answer"),
 });
+
+const weakPointSchema = z.object({
+  skill: z.string().describe("The specific skill or qualification gap"),
+  gap_severity: z
+    .enum(["low", "medium", "high"])
+    .describe("Severity: low (nice-to-have), medium (important), high (required and missing)"),
+  jd_requirement: z
+    .string()
+    .describe("The relevant requirement quoted from the job description"),
+  resume_evidence: z
+    .string()
+    .describe("What evidence exists in the resume, or explanation of why it's missing"),
+  suggestion: z
+    .string()
+    .describe("Actionable coaching suggestion to address this gap"),
+});
+
+export const weakPointsSchema = z.object({
+  weak_points: z
+    .array(weakPointSchema)
+    .min(1)
+    .max(8)
+    .describe("3-8 identified gaps between resume and job description"),
+});

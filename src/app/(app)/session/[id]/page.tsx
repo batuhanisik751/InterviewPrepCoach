@@ -56,6 +56,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
         initialStatus={session.status}
         initialQuestions={questions || []}
         answeredQuestionIds={answeredQuestionIds}
+        initialWeakPoints={session.weak_points}
       />
     </div>
   );

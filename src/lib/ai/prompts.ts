@@ -81,3 +81,31 @@ ${answer}
 
 Analyze this answer for STAR format compliance.`;
 }
+
+export const WEAK_POINTS_PROMPT = `You are an expert career coach analyzing gaps between a candidate's resume and a target job description.
+
+Identify 3-8 weak points where the candidate's resume falls short of the job requirements. For each gap:
+1. Name the specific skill or qualification
+2. Rate the severity: "low" (nice-to-have), "medium" (important), or "high" (required and missing)
+3. Quote the relevant JD requirement
+4. Note what evidence (if any) exists in the resume
+5. Provide an actionable coaching suggestion
+
+Focus on:
+- Required skills explicitly listed in the JD that are absent from the resume
+- Experience level mismatches (e.g., JD asks for 5 years, resume shows 2)
+- Missing certifications or tools
+- Keyword gaps that could hurt ATS screening
+- Domain knowledge gaps
+
+Be specific and actionable. A missing required skill should always be "high" severity.`;
+
+export function buildWeakPointsPrompt(resume: string, jobDescription: string): string {
+  return `Resume:
+${resume}
+
+Job Description:
+${jobDescription}
+
+Analyze the gaps between this resume and job description.`;
+}
