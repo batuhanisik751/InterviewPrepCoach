@@ -4,6 +4,7 @@ import { anthropic } from "@/lib/ai/anthropic";
 import { weakPointsSchema } from "@/lib/ai/schemas";
 import { WEAK_POINTS_PROMPT, buildWeakPointsPrompt } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -14,6 +15,14 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rateLimit = checkRateLimit(user.id);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Please try again later.", remaining: 0, resetAt: rateLimit.resetAt },
+      { status: 429 }
+    );
   }
 
   const { sessionId } = await request.json();
