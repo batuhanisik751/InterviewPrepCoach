@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
+import { SessionQuestions } from "./session-questions";
 
 interface SessionPageProps {
   params: Promise<{ id: string }>;
@@ -19,6 +20,13 @@ export default async function SessionPage({ params }: SessionPageProps) {
     notFound();
   }
 
+  // Fetch existing questions if any
+  const { data: questions } = await supabase
+    .from("questions")
+    .select("*")
+    .eq("session_id", id)
+    .order("sort_order", { ascending: true });
+
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-8">
@@ -30,11 +38,11 @@ export default async function SessionPage({ params }: SessionPageProps) {
         )}
       </div>
 
-      <div className="rounded-xl border border-border bg-surface p-12 text-center">
-        <p className="text-muted">
-          Question generation coming in Phase 6.
-        </p>
-      </div>
+      <SessionQuestions
+        sessionId={id}
+        initialStatus={session.status}
+        initialQuestions={questions || []}
+      />
     </div>
   );
 }
