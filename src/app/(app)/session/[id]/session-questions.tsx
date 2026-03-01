@@ -25,7 +25,7 @@ export function SessionQuestions({
   initialStatus,
   initialQuestions,
 }: SessionQuestionsProps) {
-  const [questions, setQuestions] = useState<QuestionRow[]>(initialQuestions);
+  const [questions] = useState<QuestionRow[]>(initialQuestions);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
