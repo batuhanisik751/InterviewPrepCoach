@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { QuestionCard } from "@/components/features/QuestionCard";
 import { WeakPointsList } from "@/components/features/WeakPointsList";
+import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import type { QuestionType, Difficulty, WeakPoint } from "@/types";
 
@@ -143,6 +145,18 @@ export function SessionQuestions({
           hasAnswer={answeredQuestionIds.includes(q.id)}
         />
       ))}
+
+      <div className="rounded-xl border border-border bg-surface p-6 text-center">
+        <p className="mb-2 text-sm font-medium text-foreground">
+          Ready to practice with a live interviewer?
+        </p>
+        <p className="mb-4 text-xs text-muted">
+          Start a conversational mock interview based on your resume and job description.
+        </p>
+        <Link href={`/session/${sessionId}/mock`}>
+          <Button>Start Mock Interview</Button>
+        </Link>
+      </div>
     </div>
   );
 }
