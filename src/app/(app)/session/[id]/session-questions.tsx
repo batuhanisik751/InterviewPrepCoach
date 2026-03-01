@@ -18,12 +18,14 @@ interface SessionQuestionsProps {
   sessionId: string;
   initialStatus: string;
   initialQuestions: QuestionRow[];
+  answeredQuestionIds: string[];
 }
 
 export function SessionQuestions({
   sessionId,
   initialStatus,
   initialQuestions,
+  answeredQuestionIds,
 }: SessionQuestionsProps) {
   const [questions] = useState<QuestionRow[]>(initialQuestions);
   const [loading, setLoading] = useState(false);
@@ -54,7 +56,6 @@ export function SessionQuestions({
         return;
       }
 
-      // Reload the page to get fresh data from the server
       window.location.reload();
     } catch {
       setError("Network error. Please try again.");
@@ -96,19 +97,23 @@ export function SessionQuestions({
     );
   }
 
+  const answeredCount = answeredQuestionIds.length;
+
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted">
-        {questions.length} questions generated. Answer evaluation coming in Phase 7.
+        {answeredCount} of {questions.length} questions answered
       </p>
       {questions.map((q, index) => (
         <QuestionCard
           key={q.id}
+          questionId={q.id}
           index={index}
           questionText={q.question_text}
           questionType={q.question_type}
           difficulty={q.difficulty}
           targetSkill={q.target_skill}
+          hasAnswer={answeredQuestionIds.includes(q.id)}
         />
       ))}
     </div>

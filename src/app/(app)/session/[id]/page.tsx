@@ -20,12 +20,25 @@ export default async function SessionPage({ params }: SessionPageProps) {
     notFound();
   }
 
-  // Fetch existing questions if any
+  // Fetch existing questions
   const { data: questions } = await supabase
     .from("questions")
     .select("*")
     .eq("session_id", id)
     .order("sort_order", { ascending: true });
+
+  // Fetch which questions have been answered
+  const questionIds = (questions || []).map((q) => q.id);
+  let answeredQuestionIds: string[] = [];
+
+  if (questionIds.length > 0) {
+    const { data: answers } = await supabase
+      .from("answers")
+      .select("question_id")
+      .in("question_id", questionIds);
+
+    answeredQuestionIds = (answers || []).map((a) => a.question_id);
+  }
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -42,6 +55,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
         sessionId={id}
         initialStatus={session.status}
         initialQuestions={questions || []}
+        answeredQuestionIds={answeredQuestionIds}
       />
     </div>
   );

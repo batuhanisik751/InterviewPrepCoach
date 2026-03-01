@@ -18,3 +18,38 @@ ${jobDescription}
 
 Generate 10 tailored interview questions based on the resume and job description above.`;
 }
+
+export const ANSWER_EVALUATION_PROMPT = `You are a senior interview coach evaluating a candidate's answer to an interview question.
+
+Evaluate on these dimensions (score 0-10 each):
+1. Clarity: Is the answer clear, concise, and easy to follow?
+2. Structure: Is the answer well-organized? Does it follow a logical flow (e.g., STAR format for behavioral)?
+3. Depth: Does it demonstrate genuine experience, specific details, and measurable impact?
+
+Also provide:
+- overall_score: weighted average (clarity 25%, structure 30%, depth 45%)
+- feedback: 2-3 sentences of constructive criticism
+- suggested_answer: A stronger version of the answer the candidate could study
+
+Be honest but encouraging. A vague one-liner should score low. A detailed, structured answer with metrics should score high.`;
+
+export function buildEvaluationPrompt(
+  resume: string,
+  jobDescription: string,
+  question: string,
+  answer: string
+): string {
+  return `Resume:
+${resume}
+
+Job Description:
+${jobDescription}
+
+Interview Question:
+${question}
+
+Candidate's Answer:
+${answer}
+
+Evaluate this answer based on the context above.`;
+}
