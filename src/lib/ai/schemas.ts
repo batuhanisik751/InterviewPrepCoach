@@ -47,3 +47,22 @@ export const evaluationSchema = z.object({
     .string()
     .describe("A stronger version of the answer the candidate could study"),
 });
+
+const starComponentSchema = z.object({
+  present: z.boolean().describe("Whether this STAR component is present in the answer"),
+  text: z.string().describe("The relevant text snippet from the answer, or empty string if not present"),
+  score: z.number().min(0).max(10).describe("Quality score from 0 to 10"),
+});
+
+export const starAnalysisSchema = z.object({
+  situation: starComponentSchema.describe("The Situation component of STAR"),
+  task: starComponentSchema.describe("The Task component of STAR"),
+  action: starComponentSchema.describe("The Action component of STAR"),
+  result: starComponentSchema.describe("The Result component of STAR"),
+  missing_components: z
+    .array(z.string())
+    .describe("List of missing STAR components, e.g. ['Result', 'Task']"),
+  improvement_tips: z
+    .array(z.string())
+    .describe("Specific tips for improving the STAR structure of this answer"),
+});

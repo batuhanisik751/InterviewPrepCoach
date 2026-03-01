@@ -4,6 +4,22 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { ScoreDisplay } from "./ScoreDisplay";
+import { StarBreakdown } from "./StarBreakdown";
+
+interface StarComponentData {
+  present: boolean;
+  text: string;
+  score: number;
+}
+
+interface StarBreakdownData {
+  situation: StarComponentData;
+  task: StarComponentData;
+  action: StarComponentData;
+  result: StarComponentData;
+  missing_components: string[];
+  improvement_tips: string[];
+}
 
 interface EvaluationResult {
   clarity_score: number;
@@ -16,14 +32,18 @@ interface EvaluationResult {
 
 interface AnswerEditorProps {
   questionId: string;
+  questionType: string;
 }
 
-export function AnswerEditor({ questionId }: AnswerEditorProps) {
+export function AnswerEditor({ questionId, questionType }: AnswerEditorProps) {
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
+  const [starData, setStarData] = useState<StarBreakdownData | null>(null);
   const [showSuggested, setShowSuggested] = useState(false);
+
+  const isBehavioral = questionType === "behavioral";
 
   async function handleSubmit() {
     if (answer.trim().length < 10) {
@@ -50,6 +70,9 @@ export function AnswerEditor({ questionId }: AnswerEditorProps) {
       }
 
       setEvaluation(data.evaluation);
+      if (data.starBreakdown) {
+        setStarData(data.starBreakdown);
+      }
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -71,6 +94,17 @@ export function AnswerEditor({ questionId }: AnswerEditorProps) {
           depth={evaluation.depth_score}
           overall={evaluation.overall_score}
         />
+
+        {isBehavioral && starData && (
+          <StarBreakdown
+            situation={starData.situation}
+            task={starData.task}
+            action={starData.action}
+            result={starData.result}
+            missing_components={starData.missing_components}
+            improvement_tips={starData.improvement_tips}
+          />
+        )}
 
         <div className="rounded-lg border border-border bg-surface p-4">
           <p className="mb-1 text-sm font-medium text-foreground">Feedback</p>
@@ -112,6 +146,7 @@ export function AnswerEditor({ questionId }: AnswerEditorProps) {
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted">
           {answer.length} characters
+          {isBehavioral && " — Use STAR format for best results"}
         </span>
         <Button onClick={handleSubmit} disabled={loading}>
           {loading ? "Evaluating..." : "Submit Answer"}

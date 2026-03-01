@@ -50,7 +50,7 @@ export function QuestionCard({
       {hasAnswer ? (
         <p className="mt-3 text-sm text-success">Answered</p>
       ) : (
-        <AnswerEditor questionId={questionId} />
+        <AnswerEditor questionId={questionId} questionType={questionType} />
       )}
     </div>
   );

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { generateObject } from "ai";
 import { anthropic } from "@/lib/ai/anthropic";
-import { evaluationSchema } from "@/lib/ai/schemas";
+import { evaluationSchema, starAnalysisSchema } from "@/lib/ai/schemas";
 import {
   ANSWER_EVALUATION_PROMPT,
   buildEvaluationPrompt,
+  STAR_ANALYSIS_PROMPT,
+  buildStarPrompt,
 } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
 
@@ -40,6 +42,7 @@ export async function POST(request: Request) {
   }
 
   const session = question.sessions;
+  const isBehavioral = question.question_type === "behavioral";
 
   try {
     // Save the user's answer
@@ -72,7 +75,27 @@ export async function POST(request: Request) {
       system: ANSWER_EVALUATION_PROMPT,
     });
 
-    // Save evaluation
+    // Run STAR analysis for behavioral questions
+    let starBreakdown = null;
+    let starDetected = false;
+
+    if (isBehavioral) {
+      const { object: starResult } = await generateObject({
+        model: anthropic("claude-sonnet-4-20250514"),
+        schema: starAnalysisSchema,
+        prompt: buildStarPrompt(question.question_text, userAnswer),
+        system: STAR_ANALYSIS_PROMPT,
+      });
+
+      starBreakdown = starResult;
+      starDetected =
+        starResult.situation.present &&
+        starResult.task.present &&
+        starResult.action.present &&
+        starResult.result.present;
+    }
+
+    // Save evaluation with STAR data
     const { error: evalError } = await supabase.from("evaluations").insert({
       answer_id: answer.id,
       clarity_score: evaluation.clarity_score,
@@ -81,6 +104,8 @@ export async function POST(request: Request) {
       overall_score: evaluation.overall_score,
       feedback: evaluation.feedback,
       suggested_answer: evaluation.suggested_answer,
+      star_detected: starDetected,
+      star_breakdown: starBreakdown,
     });
 
     if (evalError) {
@@ -102,7 +127,6 @@ export async function POST(request: Request) {
       .eq("questions.session_id", session.id);
 
     if (totalQuestions && answeredQuestions && answeredQuestions >= totalQuestions) {
-      // Calculate session overall score
       const { data: allEvals } = await supabase
         .from("evaluations")
         .select("overall_score, answers!inner(questions!inner(session_id))")
@@ -127,6 +151,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       answerId: answer.id,
       evaluation,
+      starBreakdown,
     });
   } catch (error) {
     console.error("Answer evaluation error:", error);

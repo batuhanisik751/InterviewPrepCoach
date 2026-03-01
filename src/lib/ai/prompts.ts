@@ -53,3 +53,31 @@ ${answer}
 
 Evaluate this answer based on the context above.`;
 }
+
+export const STAR_ANALYSIS_PROMPT = `You are an expert interview coach analyzing a candidate's answer for STAR format compliance.
+
+STAR stands for:
+- Situation: The context or background of the experience
+- Task: The specific responsibility or challenge faced
+- Action: The concrete steps the candidate took
+- Result: The outcome, ideally with measurable impact
+
+For each component (Situation, Task, Action, Result):
+1. Determine if it is present in the answer (boolean)
+2. Extract the relevant text snippet (empty string if not present)
+3. Score its quality from 0-10: specificity, measurability, relevance
+4. If missing, the score should be 0
+
+Also provide:
+- A list of which components are missing
+- Specific improvement tips for the candidate`;
+
+export function buildStarPrompt(question: string, answer: string): string {
+  return `Interview Question:
+${question}
+
+Candidate's Answer:
+${answer}
+
+Analyze this answer for STAR format compliance.`;
+}
