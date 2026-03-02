@@ -78,7 +78,7 @@ export async function POST(request: Request) {
 
     if (isBehavioral) {
       const { object } = await generateObject({
-        model: openai("mistral"),
+        model: openai.chat("mistral"),
         schema: behavioralEvaluationSchema,
         prompt: buildBehavioralEvaluationPrompt(
           session.resume_text,
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
         object.result.present;
     } else {
       const { object } = await generateObject({
-        model: openai("mistral"),
+        model: openai.chat("mistral"),
         schema: evaluationSchema,
         prompt: buildEvaluationPrompt(
           session.resume_text,

@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, Lightbulb, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import { ScoreBar } from "@/components/features/score-bar";
+import { ScoreBar, ScoreCircle } from "@/components/features/score-bar";
 import { StarBreakdown } from "@/components/features/StarBreakdown";
 
 interface StarComponentData {
@@ -89,6 +89,12 @@ export function AnswerEditor({ questionId, questionType }: AnswerEditorProps) {
         <div className="rounded-lg bg-muted/50 p-4">
           <p className="mb-2 text-xs font-semibold text-muted-foreground">Your Answer</p>
           <p className="text-sm text-foreground">{answer}</p>
+        </div>
+
+        {/* Overall score */}
+        <div className="flex flex-col items-center gap-1 py-2">
+          <ScoreCircle score={evaluation.overall_score} size="md" />
+          <span className="text-sm font-medium text-muted-foreground">Overall Score</span>
         </div>
 
         {/* Score bars */}

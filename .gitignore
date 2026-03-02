@@ -53,5 +53,8 @@ next-env.d.ts
 *.swp
 *.swo
 
+# Claude Code
+.claude/
+
 # Figma exports
 Complete_user_request/

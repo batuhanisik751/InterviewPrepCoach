@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const modelMessages = await convertToModelMessages(messages);
 
     const result = streamText({
-      model: openai("mistral"),
+      model: openai.chat("mistral"),
       system: systemPrompt,
       messages: modelMessages,
       maxOutputTokens: 300,

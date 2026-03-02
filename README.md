@@ -5,7 +5,7 @@ AI-powered interview preparation coach built with Next.js, Mistral 7B (via Ollam
 ## Features
 
 - **Tailored Question Generation** — Paste a resume (or upload a PDF) + job description to get 5 AI-generated interview questions (behavioral, technical, situational)
-- **Answer Evaluation** — AI scores answers on clarity (25%), structure (30%), and depth (45%) with detailed feedback and suggested stronger answers
+- **Answer Evaluation** — AI scores answers on clarity (25%), structure (30%), and depth (45%) with a weighted overall score, detailed feedback, and suggested stronger answers
 - **STAR Format Analysis** — Behavioral answers are checked for Situation, Task, Action, and Result components with per-component scoring
 - **Weak Point Detection** — Identifies 3-8 gaps between your resume and the job description with severity levels and coaching suggestions
 - **Mock Interviews** — Real-time streaming conversational mock interviews with AI follow-up questions
