@@ -6,7 +6,6 @@ import {
   MessageSquare,
   ArrowRight,
   Sparkles,
-  CheckCircle2,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -176,28 +175,6 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
-
-      {/* Social proof */}
-      <section className="px-6 pb-20 max-w-3xl mx-auto">
-        <Card className="bg-card border-0 shadow-sm">
-          <CardContent className="p-8 text-center">
-            <div className="flex items-center justify-center gap-1 mb-4">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <CheckCircle2 key={s} className="w-5 h-5 text-[#10b981]" />
-              ))}
-            </div>
-            <p className="text-foreground mb-4 italic text-[1.05rem] leading-[1.7]">
-              &ldquo;Interview Prep Coach helped me identify gaps in my resume I
-              didn&apos;t even know existed. The AI-generated questions were
-              spot-on for my target role, and the scoring feedback was incredibly
-              actionable.&rdquo;
-            </p>
-            <p className="text-sm text-muted-foreground font-medium">
-              — Alex Chen, Software Engineer at Stripe
-            </p>
-          </CardContent>
-        </Card>
       </section>
 
       {/* Footer */}
