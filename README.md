@@ -1,24 +1,26 @@
 # Interview Prep Coach
 
-AI-powered interview preparation coach built with Next.js, OpenAI GPT-oss-120b, and Supabase.
+AI-powered interview preparation coach built with Next.js, Mistral 7B (via Ollama), and Supabase.
 
 ## Features
 
-- **Tailored Question Generation** — Paste a resume + job description to get 10 AI-generated interview questions (behavioral, technical, situational)
+- **Tailored Question Generation** — Paste a resume (or upload a PDF) + job description to get 10 AI-generated interview questions (behavioral, technical, situational)
 - **Answer Evaluation** — AI scores answers on clarity (25%), structure (30%), and depth (45%) with detailed feedback and suggested stronger answers
 - **STAR Format Analysis** — Behavioral answers are checked for Situation, Task, Action, and Result components with per-component scoring
 - **Weak Point Detection** — Identifies 3-8 gaps between your resume and the job description with severity levels and coaching suggestions
 - **Mock Interviews** — Real-time streaming conversational mock interviews with AI follow-up questions (6-8 exchanges)
 - **Dashboard & Progress Tracking** — Score trends, session history, and comprehensive results breakdowns
 - **Authentication** — Email/password auth with protected routes and row-level security
+- **PDF Resume Parsing** — Upload a PDF resume and have it automatically extracted (up to 5 MB, 15k character limit)
 - **Rate Limiting** — 20 AI calls per hour per user to prevent abuse
 
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router, TypeScript)
-- **AI**: OpenAI GPT-oss-120b via OpenRouter + Vercel AI SDK v6 (`ai`, `@ai-sdk/openai`, `@ai-sdk/react`)
+- **AI**: Mistral 7B running locally via [Ollama](https://ollama.com) + Vercel AI SDK v6 (`ai`, `@ai-sdk/openai`, `@ai-sdk/react`)
 - **Styling**: Tailwind CSS v4
 - **Database**: Supabase (PostgreSQL + Auth + RLS)
+- **PDF Parsing**: pdf-parse
 - **Validation**: Zod
 - **Charts**: Recharts
 - **Testing**: Vitest + Testing Library
@@ -30,20 +32,25 @@ AI-powered interview preparation coach built with Next.js, OpenAI GPT-oss-120b, 
    ```bash
    npm install
    ```
-3. Copy `.env.example` to `.env.local` and fill in your keys:
+3. Install and start [Ollama](https://ollama.com), then pull the model:
+   ```bash
+   ollama pull mistral
+   ollama serve
+   ```
+4. Copy `.env.example` to `.env.local` and fill in your Supabase keys:
    ```bash
    cp .env.example .env.local
    ```
-4. Set up Supabase:
+5. Set up Supabase:
    - Create a project at [supabase.com](https://supabase.com)
    - Go to **Settings > API** to get your URL and keys
    - Go to **SQL Editor** and run each file in `supabase/migrations/` in order (001-006)
    - (Optional) Disable email confirmation under **Authentication > Providers > Email** for easier local testing
-5. Start the dev server:
+6. Start the dev server:
    ```bash
    npm run dev
    ```
-6. Open [http://localhost:3000](http://localhost:3000)
+7. Open [http://localhost:3000](http://localhost:3000)
 
 ## Scripts
 
@@ -63,7 +70,8 @@ npm run test:watch # Run tests in watch mode
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard > Settings > API > Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard > Settings > API > Publishable key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard > Settings > API > Secret key |
-| `OPENROUTER_API_KEY` | [openrouter.ai](https://openrouter.ai) > Keys |
+
+No AI API key needed — Mistral 7B runs locally via Ollama.
 
 ## Project Structure
 
@@ -78,14 +86,14 @@ src/
 │   │   │   ├── new/      # Resume + JD input
 │   │   │   └── [id]/     # Questions, answers, mock interview, results
 │   │   └── settings/
-│   └── api/          # AI API routes (questions, evaluation, weak points, mock chat)
+│   └── api/          # AI API routes (questions, evaluation, weak points, mock chat, resume parsing)
 ├── components/
 │   ├── ui/           # Button, Card, Input, Textarea, Badge, Spinner, Progress
 │   ├── layout/       # Sidebar, Navbar
 │   └── features/     # ScoreDisplay, StarBreakdown, WeakPointsList, MockChatBubble, ProgressChart
 ├── lib/
 │   ├── supabase/     # Client + server Supabase utilities
-│   ├── ai/           # OpenRouter client, prompts, Zod schemas
+│   ├── ai/           # Ollama client, prompts, Zod schemas
 │   ├── rate-limit.ts # In-memory rate limiter
 │   └── utils.ts      # cn() utility
 ├── hooks/            # Custom React hooks

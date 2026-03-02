@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   try {
     // Generate questions and detect weak points in a single call
     const { object } = await generateObject({
-      model: openai("gpt-oss-120b"),
+      model: openai("mistral"),
       schema: questionsWithWeakPointsSchema,
       prompt: buildQuestionAndWeakPointsPrompt(session.resume_text, session.job_description),
       system: QUESTION_AND_WEAKPOINTS_PROMPT,

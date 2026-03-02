@@ -1,6 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 
 export const openai = createOpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY!,
+  baseURL: "http://localhost:11434/v1",
+  apiKey: "ollama",
 });

@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
   try {
     const { object } = await generateObject({
-      model: openai("gpt-oss-120b"),
+      model: openai("mistral"),
       schema: weakPointsSchema,
       prompt: buildWeakPointsPrompt(session.resume_text, session.job_description),
       system: WEAK_POINTS_PROMPT,
