@@ -44,23 +44,6 @@ export function SessionQuestions({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function detectWeakPoints() {
-    try {
-      const res = await fetch("/api/weakpoints/detect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setWeakPoints(data.weak_points);
-      }
-    } catch {
-      // Weak point detection is non-blocking — don't fail the session
-    }
-  }
-
   async function generateQuestions() {
     setLoading(true);
     setError(null);
@@ -79,8 +62,7 @@ export function SessionQuestions({
         return;
       }
 
-      // Trigger weak point detection in parallel, then reload
-      await detectWeakPoints();
+      // Weak points are saved server-side by the generate route
       window.location.reload();
     } catch {
       setError("Network error. Please try again.");

@@ -111,7 +111,7 @@ export function MockInterview({
           <p className="mb-6 text-sm text-muted">
             An AI interviewer will ask you behavioral and situational questions
             based on your resume and the job description. The interview will last
-            6-8 questions.
+            3-4 questions.
           </p>
           <Button onClick={handleStart}>Start Mock Interview</Button>
         </div>

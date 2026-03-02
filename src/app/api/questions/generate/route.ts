@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { generateObject } from "ai";
-import { anthropic } from "@/lib/ai/anthropic";
-import { questionsSchema } from "@/lib/ai/schemas";
-import { QUESTION_GENERATION_PROMPT, buildQuestionPrompt } from "@/lib/ai/prompts";
+import { openai } from "@/lib/ai/openai";
+import { questionsWithWeakPointsSchema } from "@/lib/ai/schemas";
+import { QUESTION_AND_WEAKPOINTS_PROMPT, buildQuestionAndWeakPointsPrompt } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -50,12 +50,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Generate questions using Claude
+    // Generate questions and detect weak points in a single call
     const { object } = await generateObject({
-      model: anthropic("claude-sonnet-4-20250514"),
-      schema: questionsSchema,
-      prompt: buildQuestionPrompt(session.resume_text, session.job_description),
-      system: QUESTION_GENERATION_PROMPT,
+      model: openai("gpt-oss-120b"),
+      schema: questionsWithWeakPointsSchema,
+      prompt: buildQuestionAndWeakPointsPrompt(session.resume_text, session.job_description),
+      system: QUESTION_AND_WEAKPOINTS_PROMPT,
     });
 
     // Insert questions into the database
@@ -79,13 +79,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update session status to in_progress
+    // Update session status and save weak points
     await supabase
       .from("sessions")
-      .update({ status: "in_progress", updated_at: new Date().toISOString() })
+      .update({
+        status: "in_progress",
+        weak_points: object.weak_points,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", sessionId);
 
-    return NextResponse.json({ questions: object.questions });
+    return NextResponse.json({
+      questions: object.questions,
+      weak_points: object.weak_points,
+    });
   } catch (error) {
     console.error("Question generation error:", error);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { streamText, convertToModelMessages } from "ai";
-import { anthropic } from "@/lib/ai/anthropic";
+import { openai } from "@/lib/ai/openai";
 import { buildMockInterviewSystem } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const modelMessages = await convertToModelMessages(messages);
 
     const result = streamText({
-      model: anthropic("claude-sonnet-4-20250514"),
+      model: openai("gpt-oss-120b"),
       system: systemPrompt,
       messages: modelMessages,
       onFinish: async ({ text }) => {

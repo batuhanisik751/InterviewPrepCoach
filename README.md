@@ -1,6 +1,6 @@
 # Interview Prep Coach
 
-AI-powered interview preparation coach built with Next.js, Claude API, and Supabase.
+AI-powered interview preparation coach built with Next.js, OpenAI GPT-oss-120b, and Supabase.
 
 ## Features
 
@@ -16,7 +16,7 @@ AI-powered interview preparation coach built with Next.js, Claude API, and Supab
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router, TypeScript)
-- **AI**: Claude API via Vercel AI SDK v6 (`ai`, `@ai-sdk/anthropic`, `@ai-sdk/react`)
+- **AI**: OpenAI GPT-oss-120b via OpenRouter + Vercel AI SDK v6 (`ai`, `@ai-sdk/openai`, `@ai-sdk/react`)
 - **Styling**: Tailwind CSS v4
 - **Database**: Supabase (PostgreSQL + Auth + RLS)
 - **Validation**: Zod
@@ -63,7 +63,7 @@ npm run test:watch # Run tests in watch mode
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard > Settings > API > Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard > Settings > API > Publishable key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard > Settings > API > Secret key |
-| `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) > API Keys |
+| `OPENROUTER_API_KEY` | [openrouter.ai](https://openrouter.ai) > Keys |
 
 ## Project Structure
 
@@ -85,7 +85,7 @@ src/
 │   └── features/     # ScoreDisplay, StarBreakdown, WeakPointsList, MockChatBubble, ProgressChart
 ├── lib/
 │   ├── supabase/     # Client + server Supabase utilities
-│   ├── ai/           # Claude API client, prompts, Zod schemas
+│   ├── ai/           # OpenRouter client, prompts, Zod schemas
 │   ├── rate-limit.ts # In-memory rate limiter
 │   └── utils.ts      # cn() utility
 ├── hooks/            # Custom React hooks

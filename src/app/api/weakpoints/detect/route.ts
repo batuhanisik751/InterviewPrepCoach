@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateObject } from "ai";
-import { anthropic } from "@/lib/ai/anthropic";
+import { openai } from "@/lib/ai/openai";
 import { weakPointsSchema } from "@/lib/ai/schemas";
 import { WEAK_POINTS_PROMPT, buildWeakPointsPrompt } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
   try {
     const { object } = await generateObject({
-      model: anthropic("claude-sonnet-4-20250514"),
+      model: openai("gpt-oss-120b"),
       schema: weakPointsSchema,
       prompt: buildWeakPointsPrompt(session.resume_text, session.job_description),
       system: WEAK_POINTS_PROMPT,

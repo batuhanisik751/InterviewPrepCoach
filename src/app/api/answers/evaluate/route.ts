@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { generateObject } from "ai";
-import { anthropic } from "@/lib/ai/anthropic";
-import { evaluationSchema, starAnalysisSchema } from "@/lib/ai/schemas";
+import { openai } from "@/lib/ai/openai";
+import { evaluationSchema, behavioralEvaluationSchema } from "@/lib/ai/schemas";
 import {
   ANSWER_EVALUATION_PROMPT,
   buildEvaluationPrompt,
-  STAR_ANALYSIS_PROMPT,
-  buildStarPrompt,
+  BEHAVIORAL_EVALUATION_PROMPT,
+  buildBehavioralEvaluationPrompt,
 } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -71,37 +71,60 @@ export async function POST(request: Request) {
       );
     }
 
-    // Evaluate using Claude
-    const { object: evaluation } = await generateObject({
-      model: anthropic("claude-sonnet-4-20250514"),
-      schema: evaluationSchema,
-      prompt: buildEvaluationPrompt(
-        session.resume_text,
-        session.job_description,
-        question.question_text,
-        userAnswer
-      ),
-      system: ANSWER_EVALUATION_PROMPT,
-    });
-
-    // Run STAR analysis for behavioral questions
+    // Evaluate using AI — single call for behavioral (includes STAR), separate for others
+    let evaluation;
     let starBreakdown = null;
     let starDetected = false;
 
     if (isBehavioral) {
-      const { object: starResult } = await generateObject({
-        model: anthropic("claude-sonnet-4-20250514"),
-        schema: starAnalysisSchema,
-        prompt: buildStarPrompt(question.question_text, userAnswer),
-        system: STAR_ANALYSIS_PROMPT,
+      const { object } = await generateObject({
+        model: openai("gpt-oss-120b"),
+        schema: behavioralEvaluationSchema,
+        prompt: buildBehavioralEvaluationPrompt(
+          session.resume_text,
+          session.job_description,
+          question.question_text,
+          userAnswer
+        ),
+        system: BEHAVIORAL_EVALUATION_PROMPT,
       });
 
-      starBreakdown = starResult;
+      evaluation = {
+        clarity_score: object.clarity_score,
+        structure_score: object.structure_score,
+        depth_score: object.depth_score,
+        overall_score: object.overall_score,
+        feedback: object.feedback,
+        suggested_answer: object.suggested_answer,
+      };
+
+      starBreakdown = {
+        situation: object.situation,
+        task: object.task,
+        action: object.action,
+        result: object.result,
+        missing_components: object.missing_components,
+        improvement_tips: object.improvement_tips,
+      };
+
       starDetected =
-        starResult.situation.present &&
-        starResult.task.present &&
-        starResult.action.present &&
-        starResult.result.present;
+        object.situation.present &&
+        object.task.present &&
+        object.action.present &&
+        object.result.present;
+    } else {
+      const { object } = await generateObject({
+        model: openai("gpt-oss-120b"),
+        schema: evaluationSchema,
+        prompt: buildEvaluationPrompt(
+          session.resume_text,
+          session.job_description,
+          question.question_text,
+          userAnswer
+        ),
+        system: ANSWER_EVALUATION_PROMPT,
+      });
+      evaluation = object;
     }
 
     // Save evaluation with STAR data

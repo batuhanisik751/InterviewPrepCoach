@@ -39,10 +39,10 @@ describe("buildMockInterviewSystem", () => {
     expect(result).toContain("ONE question at a time");
   });
 
-  it("instructs to wrap up after 6-8 exchanges", () => {
+  it("instructs to wrap up after 3-4 exchanges", () => {
     const result = buildMockInterviewSystem("r", "j", "title");
 
-    expect(result).toContain("6-8 exchanges");
+    expect(result).toContain("3-4 exchanges");
   });
 
   it("includes wrap-up signal phrase", () => {
