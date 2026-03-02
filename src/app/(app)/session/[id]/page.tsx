@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { MessageSquare, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/features/score-bar";
 import { SessionQuestions } from "./session-questions";
 
 interface SessionPageProps {
@@ -40,23 +43,65 @@ export default async function SessionPage({ params }: SessionPageProps) {
           .then(({ data }) => (data || []).map((a) => a.question_id))
       : [];
 
+  const totalQuestions = (questions || []).length;
+  const answeredCount = answeredQuestionIds.length;
+  const progressPercent =
+    totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="space-y-8">
+      {/* Session header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {session.job_title || "Interview Session"}
-          </h1>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {session.job_title || "Interview Session"}
+            </h1>
+            <StatusBadge
+              status={
+                session.status as "draft" | "in_progress" | "completed"
+              }
+            />
+          </div>
           {session.company_name && (
-            <p className="mt-1 text-muted">{session.company_name}</p>
+            <p className="text-muted-foreground text-sm">
+              {session.company_name} &middot; Created{" "}
+              {new Date(session.created_at).toLocaleDateString()}
+            </p>
           )}
         </div>
-        {session.status === "completed" && (
-          <Link href={`/session/${id}/results`}>
-            <Button variant="secondary">View Results</Button>
+        <div className="flex gap-3">
+          <Link href={`/session/${id}/mock`}>
+            <Button className="gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Mock Interview
+            </Button>
           </Link>
-        )}
+          {session.status === "completed" && (
+            <Link href={`/session/${id}/results`}>
+              <Button variant="outline" className="gap-2">
+                Results
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
+
+      {/* Progress bar */}
+      {totalQuestions > 0 && (
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#2563eb] rounded-full transition-all"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <span className="text-sm font-medium text-muted-foreground">
+            {answeredCount}/{totalQuestions} answered
+          </span>
+        </div>
+      )}
 
       <SessionQuestions
         sessionId={id}

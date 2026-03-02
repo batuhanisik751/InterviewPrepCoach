@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { MessageSquare, RefreshCw } from "lucide-react";
 import { QuestionCard } from "@/components/features/QuestionCard";
 import { WeakPointsList } from "@/components/features/WeakPointsList";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/ui/Spinner";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import type { QuestionType, Difficulty, WeakPoint } from "@/types";
 
 interface QuestionRow {
@@ -74,32 +75,32 @@ export function SessionQuestions({
     return (
       <div className="flex flex-col items-center gap-4 py-16">
         <Spinner size="lg" />
-        <p className="text-muted">
+        <p className="text-muted-foreground">
           Generating tailored interview questions...
         </p>
-        <p className="text-sm text-muted">This may take a few seconds.</p>
+        <p className="text-sm text-muted-foreground">
+          This may take a few seconds.
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-xl border border-danger/20 bg-danger/5 p-8 text-center">
-        <p className="mb-4 text-danger">{error}</p>
-        <button
-          onClick={generateQuestions}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
+      <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-8 text-center">
+        <p className="mb-4 text-destructive">{error}</p>
+        <Button onClick={generateQuestions} className="gap-2">
+          <RefreshCw className="w-4 h-4" />
           Try Again
-        </button>
+        </Button>
       </div>
     );
   }
 
   if (questions.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-surface p-12 text-center">
-        <p className="text-muted">No questions yet.</p>
+      <div className="rounded-xl border border-border bg-card p-12 text-center">
+        <p className="text-muted-foreground">No questions yet.</p>
       </div>
     );
   }
@@ -112,7 +113,7 @@ export function SessionQuestions({
         <WeakPointsList weakPoints={weakPoints} />
       )}
 
-      <p className="text-sm text-muted">
+      <p className="text-sm text-muted-foreground">
         {answeredCount} of {questions.length} questions answered
       </p>
       {questions.map((q, index) => (
@@ -128,15 +129,19 @@ export function SessionQuestions({
         />
       ))}
 
-      <div className="rounded-xl border border-border bg-surface p-6 text-center">
+      <div className="rounded-xl border border-border bg-card p-6 text-center">
         <p className="mb-2 text-sm font-medium text-foreground">
           Ready to practice with a live interviewer?
         </p>
-        <p className="mb-4 text-xs text-muted">
-          Start a conversational mock interview based on your resume and job description.
+        <p className="mb-4 text-xs text-muted-foreground">
+          Start a conversational mock interview based on your resume and job
+          description.
         </p>
         <Link href={`/session/${sessionId}/mock`}>
-          <Button>Start Mock Interview</Button>
+          <Button className="gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Start Mock Interview
+          </Button>
         </Link>
       </div>
     </div>

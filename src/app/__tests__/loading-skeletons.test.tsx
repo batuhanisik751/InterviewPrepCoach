@@ -15,7 +15,7 @@ describe("Loading Skeletons", () => {
 
   it("DashboardLoading renders skeleton blocks", () => {
     const { container } = render(<DashboardLoading />);
-    const skeletons = container.querySelectorAll(".bg-surface-tertiary");
+    const skeletons = container.querySelectorAll(".bg-accent");
     expect(skeletons.length).toBeGreaterThan(3);
   });
 
@@ -48,7 +48,7 @@ describe("Loading Skeletons", () => {
 
   it("ResultsLoading renders score and question skeletons", () => {
     const { container } = render(<ResultsLoading />);
-    const skeletons = container.querySelectorAll(".bg-surface-tertiary");
+    const skeletons = container.querySelectorAll(".bg-accent");
     expect(skeletons.length).toBeGreaterThan(5);
   });
 
@@ -62,9 +62,9 @@ describe("Loading Skeletons", () => {
     expect(container.querySelector(".animate-pulse")).not.toBeNull();
   });
 
-  it("NewSessionLoading renders two-column grid skeleton", () => {
+  it("NewSessionLoading renders step indicator skeleton", () => {
     const { container } = render(<NewSessionLoading />);
-    const grid = container.querySelector(".grid");
-    expect(grid).not.toBeNull();
+    const stepIndicators = container.querySelectorAll(".rounded-full");
+    expect(stepIndicators.length).toBeGreaterThan(0);
   });
 });

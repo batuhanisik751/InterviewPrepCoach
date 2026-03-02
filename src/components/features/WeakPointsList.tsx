@@ -1,16 +1,68 @@
+"use client";
+
+import { useState } from "react";
+import { AlertTriangle, ChevronDown, ChevronUp, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/Badge";
+import { SeverityBadge } from "@/components/features/score-bar";
 import type { WeakPoint } from "@/types";
 
 interface WeakPointsListProps {
   weakPoints: WeakPoint[];
 }
 
-const severityConfig = {
-  high: { label: "High", variant: "danger" as const },
-  medium: { label: "Medium", variant: "warning" as const },
-  low: { label: "Low", variant: "info" as const },
-};
+function WeakPointCard({ wp }: { wp: WeakPoint }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="rounded-lg border border-border p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 min-w-0">
+          <AlertTriangle
+            className={cn(
+              "mt-0.5 h-4 w-4 shrink-0",
+              wp.gap_severity === "high"
+                ? "text-[#ef4444]"
+                : wp.gap_severity === "medium"
+                  ? "text-[#f59e0b]"
+                  : "text-[#3b82f6]"
+            )}
+          />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-semibold text-foreground">{wp.skill}</span>
+              <SeverityBadge severity={wp.gap_severity} />
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="text-muted-foreground hover:text-foreground shrink-0"
+        >
+          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
+      </div>
+
+      {open && (
+        <div className="pl-7 space-y-3 text-sm">
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1">JD Requires</p>
+            <p className="text-foreground">{wp.jd_requirement}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1">Your Resume</p>
+            <p className="text-foreground">{wp.resume_evidence}</p>
+          </div>
+          <div className="bg-[#2563eb]/5 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#2563eb]" />
+              <p className="text-sm text-foreground">{wp.suggestion}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function WeakPointsList({ weakPoints }: WeakPointsListProps) {
   if (weakPoints.length === 0) {
@@ -27,62 +79,32 @@ export function WeakPointsList({ weakPoints }: WeakPointsListProps) {
   const lowCount = weakPoints.filter((w) => w.gap_severity === "low").length;
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
+    <div>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm font-medium text-foreground">
-          Weak Points Analysis
-        </p>
-        <div className="flex gap-2 text-xs text-muted">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-[#f59e0b]" />
+          <p className="text-lg font-semibold text-foreground">Gap Analysis</p>
+          <span className="text-xs font-medium bg-[#f59e0b]/10 text-[#f59e0b] px-2 py-0.5 rounded-full">
+            {weakPoints.length} gaps found
+          </span>
+        </div>
+        <div className="flex gap-2 text-xs text-muted-foreground">
           {highCount > 0 && (
-            <span className="text-danger">{highCount} high</span>
+            <span className="text-[#ef4444]">{highCount} high</span>
           )}
           {mediumCount > 0 && (
-            <span className="text-warning">{mediumCount} medium</span>
+            <span className="text-[#f59e0b]">{mediumCount} medium</span>
           )}
           {lowCount > 0 && (
-            <span className="text-info">{lowCount} low</span>
+            <span className="text-[#3b82f6]">{lowCount} low</span>
           )}
         </div>
       </div>
 
-      <div className="space-y-4">
-        {sorted.map((wp, index) => {
-          const config = severityConfig[wp.gap_severity];
-          return (
-            <div
-              key={index}
-              className={cn(
-                "rounded-lg border p-3",
-                wp.gap_severity === "high"
-                  ? "border-danger/20 bg-danger/5"
-                  : wp.gap_severity === "medium"
-                    ? "border-warning/20 bg-warning/5"
-                    : "border-info/20 bg-info/5"
-              )}
-            >
-              <div className="mb-2 flex items-center gap-2">
-                <span className="text-sm font-medium text-foreground">
-                  {wp.skill}
-                </span>
-                <Badge variant={config.variant}>{config.label}</Badge>
-              </div>
-
-              <div className="space-y-1.5">
-                <p className="text-xs text-muted">
-                  <span className="font-medium">JD requires:</span>{" "}
-                  {wp.jd_requirement}
-                </p>
-                <p className="text-xs text-muted">
-                  <span className="font-medium">Resume:</span>{" "}
-                  {wp.resume_evidence}
-                </p>
-                <p className="text-xs text-foreground">
-                  <span className="font-medium">Tip:</span> {wp.suggestion}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+      <div className="space-y-3">
+        {sorted.map((wp, index) => (
+          <WeakPointCard key={index} wp={wp} />
+        ))}
       </div>
     </div>
   );

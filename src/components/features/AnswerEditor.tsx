@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Textarea } from "@/components/ui/Textarea";
-import { ScoreDisplay } from "./ScoreDisplay";
-import { StarBreakdown } from "./StarBreakdown";
+import { ChevronDown, ChevronUp, Lightbulb, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/ui/spinner";
+import { ScoreBar } from "@/components/features/score-bar";
+import { StarBreakdown } from "@/components/features/StarBreakdown";
 
 interface StarComponentData {
   present: boolean;
@@ -83,18 +85,20 @@ export function AnswerEditor({ questionId, questionType }: AnswerEditorProps) {
   if (evaluation) {
     return (
       <div className="mt-4 space-y-4">
-        <div className="rounded-lg border border-border bg-surface-secondary p-4">
-          <p className="mb-3 text-sm font-medium text-muted">Your answer:</p>
+        {/* User's answer */}
+        <div className="rounded-lg bg-muted/50 p-4">
+          <p className="mb-2 text-xs font-semibold text-muted-foreground">Your Answer</p>
           <p className="text-sm text-foreground">{answer}</p>
         </div>
 
-        <ScoreDisplay
-          clarity={evaluation.clarity_score}
-          structure={evaluation.structure_score}
-          depth={evaluation.depth_score}
-          overall={evaluation.overall_score}
-        />
+        {/* Score bars */}
+        <div className="space-y-3">
+          <ScoreBar label="Clarity" value={evaluation.clarity_score} weight="25%" />
+          <ScoreBar label="Structure" value={evaluation.structure_score} weight="30%" />
+          <ScoreBar label="Depth" value={evaluation.depth_score} weight="45%" />
+        </div>
 
+        {/* STAR breakdown for behavioral questions */}
         {isBehavioral && starData && (
           <StarBreakdown
             situation={starData.situation}
@@ -106,23 +110,33 @@ export function AnswerEditor({ questionId, questionType }: AnswerEditorProps) {
           />
         )}
 
-        <div className="rounded-lg border border-border bg-surface p-4">
-          <p className="mb-1 text-sm font-medium text-foreground">Feedback</p>
-          <p className="text-sm text-muted">{evaluation.feedback}</p>
+        {/* Feedback */}
+        <div className="rounded-lg bg-muted/50 p-4">
+          <p className="mb-2 text-xs font-semibold text-muted-foreground">AI Feedback</p>
+          <p className="text-sm leading-relaxed text-foreground">{evaluation.feedback}</p>
         </div>
 
+        {/* Suggested answer toggle */}
         <div>
           <button
             onClick={() => setShowSuggested(!showSuggested)}
-            className="text-sm font-medium text-brand-600 hover:text-brand-700"
+            className="flex items-center gap-2 text-sm font-medium text-[#2563eb] hover:underline"
           >
-            {showSuggested ? "Hide stronger answer" : "See a stronger answer"}
+            {showSuggested ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            {showSuggested ? "Hide" : "Show"} Suggested Answer
           </button>
           {showSuggested && (
-            <div className="mt-2 rounded-lg border border-brand-200 bg-brand-50 p-4">
-              <p className="text-sm text-foreground">
-                {evaluation.suggested_answer}
-              </p>
+            <div className="mt-3 bg-[#2563eb]/5 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#2563eb]" />
+                <p className="text-sm leading-relaxed text-foreground">
+                  {evaluation.suggested_answer}
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -137,19 +151,29 @@ export function AnswerEditor({ questionId, questionType }: AnswerEditorProps) {
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
         rows={4}
-        className="resize-none"
+        className="min-h-[120px] resize-none"
         disabled={loading}
       />
       {error && (
-        <p className="text-sm text-danger">{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       )}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted">
+        <span className="text-xs text-muted-foreground">
           {answer.length} characters
-          {isBehavioral && " — Use STAR format for best results"}
+          {isBehavioral && " \u2014 Use STAR format for best results"}
         </span>
-        <Button onClick={handleSubmit} disabled={loading}>
-          {loading ? "Evaluating..." : "Submit Answer"}
+        <Button onClick={handleSubmit} disabled={loading} size="sm" className="gap-2">
+          {loading ? (
+            <>
+              <Spinner size="sm" />
+              Evaluating...
+            </>
+          ) : (
+            <>
+              <Send className="h-3 w-3" />
+              Submit Answer
+            </>
+          )}
         </Button>
       </div>
     </div>

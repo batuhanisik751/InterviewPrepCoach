@@ -1,6 +1,9 @@
 "use client";
 
-import { Badge } from "@/components/ui/Badge";
+import { MessageSquare, CheckCircle2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { TypeBadge, DifficultyBadge } from "@/components/features/score-bar";
 import { AnswerEditor } from "./AnswerEditor";
 import type { QuestionType, Difficulty } from "@/types";
 
@@ -14,19 +17,6 @@ interface QuestionCardProps {
   hasAnswer: boolean;
 }
 
-const typeBadgeVariant: Record<QuestionType, "info" | "success" | "warning" | "default"> = {
-  behavioral: "info",
-  technical: "success",
-  situational: "warning",
-  general: "default",
-};
-
-const difficultyBadgeVariant: Record<Difficulty, "success" | "warning" | "danger"> = {
-  easy: "success",
-  medium: "warning",
-  hard: "danger",
-};
-
 export function QuestionCard({
   questionId,
   index,
@@ -37,21 +27,31 @@ export function QuestionCard({
   hasAnswer,
 }: QuestionCardProps) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-5">
-      <div className="mb-3 flex items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-xs font-medium text-brand-700">
-          {index + 1}
-        </span>
-        <Badge variant={typeBadgeVariant[questionType]}>{questionType}</Badge>
-        <Badge variant={difficultyBadgeVariant[difficulty]}>{difficulty}</Badge>
-        <span className="ml-auto text-xs text-muted">{targetSkill}</span>
-      </div>
-      <p className="text-foreground">{questionText}</p>
-      {hasAnswer ? (
-        <p className="mt-3 text-sm text-success">Answered</p>
-      ) : (
-        <AnswerEditor questionId={questionId} questionType={questionType} />
-      )}
-    </div>
+    <Card>
+      <CardContent className="p-5 space-y-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-muted-foreground">
+              Q{index + 1}
+            </span>
+            <TypeBadge type={questionType} />
+            <DifficultyBadge difficulty={difficulty} />
+            <span className="ml-auto text-xs text-muted-foreground">
+              {targetSkill}
+            </span>
+          </div>
+          <p className="text-sm font-medium text-foreground">{questionText}</p>
+        </div>
+
+        {hasAnswer ? (
+          <div className="flex items-center gap-2 pt-2 border-t border-border">
+            <CheckCircle2 className="h-4 w-4 text-[#10b981]" />
+            <span className="text-sm font-medium text-[#10b981]">Answered</span>
+          </div>
+        ) : (
+          <AnswerEditor questionId={questionId} questionType={questionType} />
+        )}
+      </CardContent>
+    </Card>
   );
 }

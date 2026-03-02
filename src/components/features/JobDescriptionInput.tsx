@@ -1,7 +1,9 @@
 "use client";
 
-import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
+import { Briefcase } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface JobDescriptionInputProps {
   value: string;
@@ -24,35 +26,46 @@ export function JobDescriptionInput({
 }: JobDescriptionInputProps) {
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4">
-        <Input
-          id="jobTitle"
-          label="Job Title (optional)"
-          placeholder="e.g. Senior Frontend Engineer"
-          value={jobTitle}
-          onChange={(e) => onJobTitleChange(e.target.value)}
-        />
-        <Input
-          id="companyName"
-          label="Company (optional)"
-          placeholder="e.g. Acme Inc."
-          value={companyName}
-          onChange={(e) => onCompanyNameChange(e.target.value)}
-        />
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="jobTitle">Job Title (optional)</Label>
+          <Input
+            id="jobTitle"
+            placeholder="e.g. Senior Frontend Engineer"
+            value={jobTitle}
+            onChange={(e) => onJobTitleChange(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="companyName">Company (optional)</Label>
+          <Input
+            id="companyName"
+            placeholder="e.g. Acme Inc."
+            value={companyName}
+            onChange={(e) => onCompanyNameChange(e.target.value)}
+          />
+        </div>
       </div>
-      <Textarea
-        id="jobDescription"
-        label="Job Description"
-        placeholder="Paste the full job description here..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        error={error}
-        rows={12}
-        className="flex-1 resize-none"
-      />
-      <p className="-mt-3 text-right text-xs text-muted">
-        {value.length.toLocaleString()} / 10,000 characters
-      </p>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="jobDescription">Job Description</Label>
+          <span className="text-xs text-muted-foreground">
+            {value.length.toLocaleString()} / 10,000
+          </span>
+        </div>
+        <Textarea
+          id="jobDescription"
+          placeholder="Paste the job description here..."
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={12}
+          className="min-h-[200px] flex-1 resize-none"
+        />
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+      </div>
     </div>
   );
 }

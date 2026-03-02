@@ -60,11 +60,11 @@ describe("ResumeInput", () => {
 });
 
 describe("ResumeInput - PDF Upload", () => {
-  it("renders an Upload PDF button", () => {
+  it("renders an upload zone", () => {
     const { container } = render(
       <ResumeInput value="" onChange={vi.fn()} />
     );
-    expect(container.textContent).toContain("Upload PDF");
+    expect(container.textContent).toContain("Upload your resume");
   });
 
   it("renders a hidden file input with PDF accept attribute", () => {

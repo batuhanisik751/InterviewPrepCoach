@@ -22,8 +22,8 @@ interface ProgressChartProps {
 export function ProgressChart({ data }: ProgressChartProps) {
   if (data.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg border border-border bg-surface">
-        <p className="text-sm text-muted">
+      <div className="flex h-48 items-center justify-center rounded-lg border border-border bg-card">
+        <p className="text-sm text-muted-foreground">
           Complete sessions to see your score trend.
         </p>
       </div>
@@ -37,23 +37,23 @@ export function ProgressChart({ data }: ProgressChartProps) {
           data={data}
           margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 12, fill: "var(--color-muted)" }}
+            tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
             domain={[0, 10]}
-            tick={{ fontSize: 12, fill: "var(--color-muted)" }}
+            tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
               borderRadius: "8px",
               fontSize: "12px",
             }}
@@ -62,9 +62,9 @@ export function ProgressChart({ data }: ProgressChartProps) {
           <Line
             type="monotone"
             dataKey="score"
-            stroke="var(--color-brand-600)"
+            stroke="#2563eb"
             strokeWidth={2}
-            dot={{ r: 4, fill: "var(--color-brand-600)" }}
+            dot={{ r: 4, fill: "#2563eb" }}
             activeDot={{ r: 6 }}
           />
         </LineChart>

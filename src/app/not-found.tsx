@@ -1,21 +1,27 @@
 import Link from "next/link";
+import { ArrowLeft, FileQuestion } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <p className="text-6xl font-bold text-brand-600">404</p>
-      <h1 className="mt-4 text-xl font-semibold text-foreground">
-        Page not found
-      </h1>
-      <p className="mt-2 text-muted">
-        The page you are looking for does not exist or has been moved.
-      </p>
-      <Link
-        href="/dashboard"
-        className="mt-6 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-      >
-        Go to Dashboard
-      </Link>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="text-center">
+        <div className="w-20 h-20 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6">
+          <FileQuestion className="w-10 h-10 text-muted-foreground" />
+        </div>
+        <h1 className="text-foreground mb-2 text-[1.75rem] font-bold">
+          Page not found
+        </h1>
+        <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+        </p>
+        <Link href="/dashboard">
+          <Button className="gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

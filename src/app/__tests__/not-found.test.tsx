@@ -21,9 +21,9 @@ vi.mock("next/link", () => ({
 import { vi } from "vitest";
 
 describe("NotFound", () => {
-  it("renders 404 text", () => {
+  it("renders page not found icon", () => {
     const { container } = render(<NotFound />);
-    expect(container.textContent).toContain("404");
+    expect(container.querySelector("svg")).not.toBeNull();
   });
 
   it("renders page not found heading", () => {
@@ -34,7 +34,7 @@ describe("NotFound", () => {
   it("renders a description", () => {
     const { container } = render(<NotFound />);
     expect(container.textContent).toContain(
-      "does not exist or has been moved"
+      "exist or has been moved"
     );
   });
 
@@ -42,6 +42,6 @@ describe("NotFound", () => {
     const { container } = render(<NotFound />);
     const link = container.querySelector('a[href="/dashboard"]');
     expect(link).not.toBeNull();
-    expect(link?.textContent).toContain("Go to Dashboard");
+    expect(link?.textContent).toContain("Back to Dashboard");
   });
 });

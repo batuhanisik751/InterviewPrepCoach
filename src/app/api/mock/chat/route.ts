@@ -53,6 +53,7 @@ export async function POST(request: Request) {
       model: openai("mistral"),
       system: systemPrompt,
       messages: modelMessages,
+      maxOutputTokens: 300,
       onFinish: async ({ text }) => {
         await supabase.from("mock_messages").insert({
           session_id: sessionId,

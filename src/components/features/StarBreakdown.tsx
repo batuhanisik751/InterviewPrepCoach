@@ -1,3 +1,4 @@
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StarComponent {
@@ -33,43 +34,31 @@ export function StarBreakdown({
   const components = { situation, task, action, result };
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
-      <p className="mb-3 text-sm font-medium text-foreground">
-        STAR Format Analysis
+    <div className="rounded-lg border border-border bg-card p-4">
+      <p className="mb-3 text-xs font-semibold text-muted-foreground">
+        STAR Breakdown
       </p>
 
-      <div className="space-y-3">
-        {labels.map(({ key, label, letter }) => {
+      <div className="grid gap-2">
+        {labels.map(({ key, label }) => {
           const comp = components[key];
           return (
-            <div key={key} className="flex gap-3">
-              <div
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-                  comp.present
-                    ? "bg-success/10 text-success"
-                    : "bg-danger/10 text-danger"
+            <div key={key} className="flex items-start gap-2 text-sm">
+              <span className={cn("mt-0.5", comp.present ? "text-[#10b981]" : "text-[#ef4444]")}>
+                {comp.present ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4" />
                 )}
-              >
-                {letter}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-foreground">
-                    {label}
-                  </span>
-                  <span
-                    className={cn(
-                      "text-xs",
-                      comp.present ? "text-success" : "text-danger"
-                    )}
-                  >
-                    {comp.present ? `${comp.score}/10` : "Missing"}
-                  </span>
-                </div>
+              </span>
+              <div className="min-w-0">
+                <span className="font-medium capitalize text-foreground">{label}</span>
+                <span className="ml-2 text-muted-foreground">
+                  {comp.present ? `(${comp.score}/10)` : "(Missing)"}
+                </span>
                 {comp.present && comp.text && (
-                  <p className="mt-1 text-xs text-muted line-clamp-2">
-                    {comp.text}
+                  <p className="mt-0.5 text-xs italic text-muted-foreground line-clamp-2">
+                    &ldquo;{comp.text}&rdquo;
                   </p>
                 )}
               </div>
@@ -79,20 +68,20 @@ export function StarBreakdown({
       </div>
 
       {missing_components.length > 0 && (
-        <div className="mt-4 rounded-lg bg-warning/5 p-3">
-          <p className="text-xs font-medium text-warning">
+        <div className="mt-3 rounded-lg bg-[#f59e0b]/5 p-3">
+          <p className="text-xs font-medium text-[#f59e0b]">
             Missing: {missing_components.join(", ")}
           </p>
         </div>
       )}
 
       {improvement_tips.length > 0 && (
-        <div className="mt-3">
-          <p className="mb-1 text-xs font-medium text-muted">Tips:</p>
+        <div className="mt-3 rounded-lg bg-muted/50 p-3">
+          <p className="mb-1 text-xs font-medium text-muted-foreground">Tips:</p>
           <ul className="space-y-1">
             {improvement_tips.map((tip, i) => (
-              <li key={i} className="text-xs text-muted">
-                - {tip}
+              <li key={i} className="text-xs text-muted-foreground">
+                &bull; {tip}
               </li>
             ))}
           </ul>

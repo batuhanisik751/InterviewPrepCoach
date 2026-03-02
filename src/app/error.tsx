@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -14,19 +15,16 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <p className="text-5xl font-bold text-danger">Oops</p>
+      <p className="text-5xl font-bold text-destructive">Oops</p>
       <h1 className="mt-4 text-xl font-semibold text-foreground">
         Something went wrong
       </h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-sm text-muted-foreground">
         An unexpected error occurred. Please try again.
       </p>
-      <button
-        onClick={reset}
-        className="mt-6 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-      >
+      <Button onClick={reset} className="mt-6">
         Try Again
-      </button>
+      </Button>
     </div>
   );
 }

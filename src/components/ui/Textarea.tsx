@@ -1,39 +1,18 @@
-import { cn } from "@/lib/utils";
-import { TextareaHTMLAttributes, forwardRef } from "react";
+import * as React from "react";
 
-interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
-  error?: string;
+import { cn } from "@/lib/utils";
+
+function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+  return (
+    <textarea
+      data-slot="textarea"
+      className={cn(
+        "resize-none border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-input-background px-3 py-2 text-base transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, id, ...props }, ref) => {
-    return (
-      <div>
-        {label && (
-          <label
-            htmlFor={id}
-            className="mb-1 block text-sm font-medium text-foreground"
-          >
-            {label}
-          </label>
-        )}
-        <textarea
-          ref={ref}
-          id={id}
-          className={cn(
-            "w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500",
-            error && "border-danger focus:border-danger focus:ring-danger",
-            className
-          )}
-          {...props}
-        />
-        {error && (
-          <p className="mt-1 text-sm text-danger">{error}</p>
-        )}
-      </div>
-    );
-  }
-);
-
-Textarea.displayName = "Textarea";
+export { Textarea };
