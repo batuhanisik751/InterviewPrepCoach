@@ -49,6 +49,19 @@ export async function POST(request: Request) {
     );
   }
 
+  // Guard against race conditions: check if questions already exist in the DB
+  const { count: existingCount } = await supabase
+    .from("questions")
+    .select("*", { count: "exact", head: true })
+    .eq("session_id", sessionId);
+
+  if (existingCount && existingCount > 0) {
+    return NextResponse.json(
+      { error: "Questions already exist for this session" },
+      { status: 409 }
+    );
+  }
+
   try {
     // Generate questions and detect weak points in a single call
     const { object } = await generateObject({

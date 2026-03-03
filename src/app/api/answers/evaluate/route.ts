@@ -10,6 +10,7 @@ import {
 } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { calculateOverallScore } from "@/lib/ai/scoring";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -93,7 +94,11 @@ export async function POST(request: Request) {
         clarity_score: object.clarity_score,
         structure_score: object.structure_score,
         depth_score: object.depth_score,
-        overall_score: object.overall_score,
+        overall_score: calculateOverallScore(
+          object.clarity_score,
+          object.structure_score,
+          object.depth_score
+        ),
         feedback: object.feedback,
         suggested_answer: object.suggested_answer,
       };
@@ -124,7 +129,14 @@ export async function POST(request: Request) {
         ),
         system: ANSWER_EVALUATION_PROMPT,
       });
-      evaluation = object;
+      evaluation = {
+        ...object,
+        overall_score: calculateOverallScore(
+          object.clarity_score,
+          object.structure_score,
+          object.depth_score
+        ),
+      };
     }
 
     // Save evaluation with STAR data

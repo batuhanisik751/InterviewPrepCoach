@@ -9,10 +9,22 @@ import {
   buildBehavioralEvaluationPrompt,
 } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
+import { calculateOverallScore } from "@/lib/ai/scoring";
 
 interface QAPair {
   mockQuestion: string;
   userAnswer: string;
+}
+
+function extractQuestionFromMessage(content: string): string {
+  // Extract the question portion from an assistant message.
+  // The question is typically the last sentence ending with "?"
+  const sentences = content.split(/(?<=[.!?])\s+/);
+  const questionSentences = sentences.filter((s) => s.trim().endsWith("?"));
+  // Return the last question sentence (most likely the actual interview question)
+  return questionSentences.length > 0
+    ? questionSentences[questionSentences.length - 1].trim()
+    : content;
 }
 
 function extractQAPairs(
@@ -29,7 +41,7 @@ function extractQAPairs(
       next.role === "user"
     ) {
       pairs.push({
-        mockQuestion: msg.content,
+        mockQuestion: extractQuestionFromMessage(msg.content),
         userAnswer: next.content,
       });
     }
@@ -38,11 +50,12 @@ function extractQAPairs(
 }
 
 function computeWordOverlap(a: string, b: string): number {
-  const wordsA = new Set(a.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/));
-  const wordsB = new Set(b.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/));
+  const wordsA = new Set(a.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean));
+  const wordsB = new Set(b.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean));
   let overlap = 0;
   for (const word of wordsA) {
-    if (word.length > 3 && wordsB.has(word)) overlap++;
+    // Count words with 2+ characters (lowered from 3 to catch more matches)
+    if (word.length >= 2 && wordsB.has(word)) overlap++;
   }
   return overlap;
 }
@@ -63,6 +76,9 @@ function matchToPregenerated(
       bestMatch = q;
     }
   }
+
+  // Require at least 1 overlapping word to consider it a valid match
+  if (bestScore < 1) return null;
 
   return bestMatch;
 }
@@ -143,6 +159,8 @@ export async function POST(request: Request) {
   // Extract Q&A pairs from mock messages
   const qaPairs = extractQAPairs(mockMessages);
 
+  console.log(`[save-results] Extracted ${qaPairs.length} Q&A pairs from ${mockMessages.length} messages`);
+
   if (qaPairs.length === 0) {
     return NextResponse.json(
       { error: "No question-answer pairs found in mock messages" },
@@ -166,6 +184,9 @@ export async function POST(request: Request) {
     if (match) {
       usedIds.add(match.id);
       matchedPairs.push({ question: match, userAnswer: pair.userAnswer });
+      console.log(`[save-results] Matched: "${pair.mockQuestion.slice(0, 60)}..." -> Q:${match.id}`);
+    } else {
+      console.log(`[save-results] No match for: "${pair.mockQuestion.slice(0, 60)}..."`);
     }
   }
 
@@ -177,7 +198,8 @@ export async function POST(request: Request) {
   }
 
   // Save answers and run evaluations
-  const evaluationResults = [];
+  const evaluationResults: { clarity_score: number; structure_score: number; depth_score: number; overall_score: number; feedback: string; suggested_answer: string }[] = [];
+  let failedEvaluations = 0;
 
   for (const { question, userAnswer } of matchedPairs) {
     // Save answer
@@ -216,7 +238,11 @@ export async function POST(request: Request) {
           clarity_score: object.clarity_score,
           structure_score: object.structure_score,
           depth_score: object.depth_score,
-          overall_score: object.overall_score,
+          overall_score: calculateOverallScore(
+            object.clarity_score,
+            object.structure_score,
+            object.depth_score
+          ),
           feedback: object.feedback,
           suggested_answer: object.suggested_answer,
         };
@@ -247,7 +273,14 @@ export async function POST(request: Request) {
           ),
           system: ANSWER_EVALUATION_PROMPT,
         });
-        evaluation = object;
+        evaluation = {
+          ...object,
+          overall_score: calculateOverallScore(
+            object.clarity_score,
+            object.structure_score,
+            object.depth_score
+          ),
+        };
       }
 
       // Save evaluation
@@ -264,8 +297,9 @@ export async function POST(request: Request) {
       });
 
       evaluationResults.push(evaluation);
-    } catch {
-      // Continue with remaining evaluations even if one fails
+    } catch (error) {
+      console.error(`Evaluation failed for question ${question.id}:`, error);
+      failedEvaluations++;
       continue;
     }
   }
@@ -289,6 +323,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     saved: matchedPairs.length,
     evaluated: evaluationResults.length,
+    failedEvaluations,
     resultsUrl: `/session/${sessionId}/results`,
   });
 }

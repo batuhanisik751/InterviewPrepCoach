@@ -2,7 +2,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { MessageSquare, ArrowRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/features/score-bar";
 import { SessionQuestions } from "./session-questions";
@@ -32,21 +31,38 @@ export default async function SessionPage({ params }: SessionPageProps) {
     .eq("session_id", id)
     .order("sort_order", { ascending: true });
 
-  // Fetch which questions have been answered
+  // Fetch answers with their evaluations
   const questionIds = (questions || []).map((q) => q.id);
-  const answeredQuestionIds =
-    questionIds.length > 0
-      ? await supabase
-          .from("answers")
-          .select("question_id")
-          .in("question_id", questionIds)
-          .then(({ data }) => (data || []).map((a) => a.question_id))
-      : [];
+  let answeredQuestionIds: string[] = [];
+  let initialEvaluations: Record<
+    string,
+    {
+      clarity_score: number;
+      structure_score: number;
+      depth_score: number;
+      overall_score: number;
+      feedback: string;
+      suggested_answer: string;
+    }
+  > = {};
 
-  const totalQuestions = (questions || []).length;
-  const answeredCount = answeredQuestionIds.length;
-  const progressPercent =
-    totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  if (questionIds.length > 0) {
+    const { data: answersData } = await supabase
+      .from("answers")
+      .select(
+        "question_id, evaluations(clarity_score, structure_score, depth_score, overall_score, feedback, suggested_answer)"
+      )
+      .in("question_id", questionIds);
+
+    answeredQuestionIds = (answersData || []).map((a) => a.question_id);
+
+    for (const a of answersData || []) {
+      const evals = a.evaluations;
+      if (Array.isArray(evals) && evals.length > 0) {
+        initialEvaluations[a.question_id] = evals[0];
+      }
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -88,27 +104,13 @@ export default async function SessionPage({ params }: SessionPageProps) {
         </div>
       </div>
 
-      {/* Progress bar */}
-      {totalQuestions > 0 && (
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#2563eb] rounded-full transition-all"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <span className="text-sm font-medium text-muted-foreground">
-            {answeredCount}/{totalQuestions} answered
-          </span>
-        </div>
-      )}
-
       <SessionQuestions
         sessionId={id}
         initialStatus={session.status}
         initialQuestions={questions || []}
         answeredQuestionIds={answeredQuestionIds}
         initialWeakPoints={session.weak_points}
+        initialEvaluations={initialEvaluations}
       />
     </div>
   );

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock, MessageSquare } from "lucide-react";
+import { ArrowLeft, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MockInterview } from "./mock-interview";
+import { EndInterviewButton } from "./end-interview-button";
 
 interface MockPageProps {
   params: Promise<{ id: string }>;
@@ -55,11 +56,7 @@ export default async function MockPage({ params }: MockPageProps) {
             <MessageSquare className="w-4 h-4" />
             <span>Mock Interview</span>
           </div>
-          <Link href={`/session/${id}`}>
-            <Button variant="outline" size="sm">
-              End Interview
-            </Button>
-          </Link>
+          <EndInterviewButton sessionId={id} />
         </div>
       </div>
 

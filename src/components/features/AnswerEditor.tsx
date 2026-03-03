@@ -1,49 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Lightbulb, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import { ScoreBar, ScoreCircle } from "@/components/features/score-bar";
-import { StarBreakdown } from "@/components/features/StarBreakdown";
-
-interface StarComponentData {
-  present: boolean;
-  text: string;
-  score: number;
-}
-
-interface StarBreakdownData {
-  situation: StarComponentData;
-  task: StarComponentData;
-  action: StarComponentData;
-  result: StarComponentData;
-  missing_components: string[];
-  improvement_tips: string[];
-}
-
-interface EvaluationResult {
-  clarity_score: number;
-  structure_score: number;
-  depth_score: number;
-  overall_score: number;
-  feedback: string;
-  suggested_answer: string;
-}
+import type { EvaluationData } from "@/components/features/QuestionCard";
 
 interface AnswerEditorProps {
   questionId: string;
   questionType: string;
+  onAnswerSubmitted?: (evaluation: EvaluationData) => void;
 }
 
-export function AnswerEditor({ questionId, questionType }: AnswerEditorProps) {
+export function AnswerEditor({ questionId, questionType, onAnswerSubmitted }: AnswerEditorProps) {
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
-  const [starData, setStarData] = useState<StarBreakdownData | null>(null);
-  const [showSuggested, setShowSuggested] = useState(false);
 
   const isBehavioral = questionType === "behavioral";
 
@@ -71,83 +44,19 @@ export function AnswerEditor({ questionId, questionType }: AnswerEditorProps) {
         return;
       }
 
-      setEvaluation(data.evaluation);
-      if (data.starBreakdown) {
-        setStarData(data.starBreakdown);
-      }
+      onAnswerSubmitted?.({
+        clarity_score: data.evaluation.clarity_score,
+        structure_score: data.evaluation.structure_score,
+        depth_score: data.evaluation.depth_score,
+        overall_score: data.evaluation.overall_score,
+        feedback: data.evaluation.feedback,
+        suggested_answer: data.evaluation.suggested_answer,
+      });
     } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
-
-  if (evaluation) {
-    return (
-      <div className="mt-4 space-y-4">
-        {/* User's answer */}
-        <div className="rounded-lg bg-muted/50 p-4">
-          <p className="mb-2 text-xs font-semibold text-muted-foreground">Your Answer</p>
-          <p className="text-sm text-foreground">{answer}</p>
-        </div>
-
-        {/* Overall score */}
-        <div className="flex flex-col items-center gap-1 py-2">
-          <ScoreCircle score={evaluation.overall_score} size="md" />
-          <span className="text-sm font-medium text-muted-foreground">Overall Score</span>
-        </div>
-
-        {/* Score bars */}
-        <div className="space-y-3">
-          <ScoreBar label="Clarity" value={evaluation.clarity_score} weight="25%" />
-          <ScoreBar label="Structure" value={evaluation.structure_score} weight="30%" />
-          <ScoreBar label="Depth" value={evaluation.depth_score} weight="45%" />
-        </div>
-
-        {/* STAR breakdown for behavioral questions */}
-        {isBehavioral && starData && (
-          <StarBreakdown
-            situation={starData.situation}
-            task={starData.task}
-            action={starData.action}
-            result={starData.result}
-            missing_components={starData.missing_components}
-            improvement_tips={starData.improvement_tips}
-          />
-        )}
-
-        {/* Feedback */}
-        <div className="rounded-lg bg-muted/50 p-4">
-          <p className="mb-2 text-xs font-semibold text-muted-foreground">AI Feedback</p>
-          <p className="text-sm leading-relaxed text-foreground">{evaluation.feedback}</p>
-        </div>
-
-        {/* Suggested answer toggle */}
-        <div>
-          <button
-            onClick={() => setShowSuggested(!showSuggested)}
-            className="flex items-center gap-2 text-sm font-medium text-[#2563eb] hover:underline"
-          >
-            {showSuggested ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {showSuggested ? "Hide" : "Show"} Suggested Answer
-          </button>
-          {showSuggested && (
-            <div className="mt-3 bg-[#2563eb]/5 rounded-lg p-4">
-              <div className="flex items-start gap-2">
-                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#2563eb]" />
-                <p className="text-sm leading-relaxed text-foreground">
-                  {evaluation.suggested_answer}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
   }
 
   return (

@@ -61,6 +61,10 @@ export async function POST(request: Request) {
       type: q.question_type,
     }));
 
+    // Determine which turn the AI is on (0 = first message, 1 = after Q1 answered, etc.)
+    const turnNumber = assistantMsgCount ?? 0;
+    const totalQuestions = questionList.length;
+
     let systemPrompt = buildMockInterviewSystem(
       session.resume_text,
       session.job_description,
@@ -68,18 +72,24 @@ export async function POST(request: Request) {
       questionList
     );
 
-    // If 4+ assistant messages already exist, force wrap-up
-    if (assistantMsgCount && assistantMsgCount >= 4) {
-      systemPrompt += "\n\nCRITICAL: You have already asked enough questions. You MUST wrap up NOW. Do NOT ask another question. Provide your final summary and include the phrase \"Thank you for completing this mock interview\".";
+    // Inject explicit turn instruction so the model knows exactly what to do
+    if (turnNumber === 0) {
+      systemPrompt += `\n\nYOU ARE ON MESSAGE 1. Introduce yourself and ask question #1 ONLY. Output NOTHING else. Do NOT ask question #2.`;
+    } else if (turnNumber < totalQuestions) {
+      systemPrompt += `\n\nYOU ARE ON MESSAGE ${turnNumber + 1}. The candidate just answered question #${turnNumber}. Acknowledge in ONE short sentence, then ask question #${turnNumber + 1} EXACTLY as written. Output NOTHING else. Do NOT ask question #${turnNumber + 2}. Do NOT provide feedback or rewrite their answer.`;
+    } else {
+      systemPrompt += `\n\nTHIS IS THE FINAL MESSAGE. The candidate has answered all questions. Do NOT ask another question. Provide your Interview Reflection and Recommendation, then end with "Thank you for completing this mock interview".`;
     }
 
     const modelMessages = await convertToModelMessages(messages);
 
+    // Use more tokens for the final wrap-up message that includes comprehensive feedback
+    const isFinalTurn = turnNumber >= totalQuestions;
     const result = streamText({
       model: openai.chat("mistral"),
       system: systemPrompt,
       messages: modelMessages,
-      maxOutputTokens: 300,
+      maxOutputTokens: isFinalTurn ? 800 : 200,
       onFinish: async ({ text }) => {
         await supabase.from("mock_messages").insert({
           session_id: sessionId,
