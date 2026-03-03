@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
-  Download,
   RotateCcw,
   Trophy,
   AlertTriangle,
@@ -21,6 +20,8 @@ import {
 import { StarBreakdown } from "@/components/features/StarBreakdown";
 import { WeakPointsList } from "@/components/features/WeakPointsList";
 import { QuestionResultAccordion } from "./question-result-accordion";
+import { ExportPdfButton } from "./export-pdf-button";
+import type { PdfResultsData } from "@/lib/pdf/generate-results-pdf";
 
 interface ResultsPageProps {
   params: Promise<{ id: string }>;
@@ -119,6 +120,31 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     };
   });
 
+  const pdfData: PdfResultsData = {
+    jobTitle: session.job_title || "Interview Session",
+    companyName: session.company_name,
+    overallScore: session.overall_score ?? 0,
+    avgClarity: Number(avgClarity.toFixed(1)),
+    avgStructure: Number(avgStructure.toFixed(1)),
+    avgDepth: Number(avgDepth.toFixed(1)),
+    answeredCount,
+    totalQuestions,
+    weakPoints: (session.weak_points || []).slice(0, 4).map((wp: { skill: string; gap_severity: "high" | "medium" | "low"; suggestion: string }) => ({
+      skill: wp.skill,
+      severity: wp.gap_severity,
+      suggestion: wp.suggestion,
+    })),
+    questions: questionBreakdown.map((q) => ({
+      number: q.number,
+      questionText: q.questionText,
+      questionType: q.questionType,
+      difficulty: q.difficulty,
+      targetSkill: q.targetSkill,
+      answerText: q.answer?.text || null,
+      evaluation: q.evaluation,
+    })),
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -140,10 +166,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
-            <Download className="w-4 h-4" />
-            Export PDF
-          </Button>
+          <ExportPdfButton data={pdfData} />
           <Link href="/session/new">
             <Button className="gap-2">
               <RotateCcw className="w-4 h-4" />
@@ -207,7 +230,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
               (
                 wp: {
                   skill: string;
-                  severity: "high" | "medium" | "low";
+                  gap_severity: "high" | "medium" | "low";
                   suggestion: string;
                 },
                 idx: number
@@ -218,7 +241,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
                       <span className="text-sm font-semibold text-foreground">
                         {wp.skill}
                       </span>
-                      <SeverityBadge severity={wp.severity} />
+                      <SeverityBadge severity={wp.gap_severity} />
                     </div>
                     <div className="bg-[#2563eb]/5 rounded-lg p-3 mt-2">
                       <div className="flex items-start gap-2">
