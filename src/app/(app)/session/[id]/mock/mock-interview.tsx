@@ -2,8 +2,8 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useEffect, useRef, useState } from "react";
-import { Send, GraduationCap, User } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Send, GraduationCap, User, Loader2 } from "lucide-react";
 import { MockChatBubble } from "@/components/features/MockChatBubble";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -24,6 +24,9 @@ export function MockInterview({
   existingMessages,
 }: MockInterviewProps) {
   const [started, setStarted] = useState(existingMessages.length > 0);
+  const [savingResults, setSavingResults] = useState(false);
+  const [resultsSaved, setResultsSaved] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -64,6 +67,36 @@ export function MockInterview({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Save results when interview completes
+  const saveResults = useCallback(async () => {
+    if (savingResults || resultsSaved) return;
+    setSavingResults(true);
+    setSaveError(false);
+    try {
+      const res = await fetch("/api/mock/save-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      });
+      if (res.ok || res.status === 409) {
+        // 409 means answers already saved — treat as success
+        setResultsSaved(true);
+      } else {
+        setSaveError(true);
+      }
+    } catch {
+      setSaveError(true);
+    } finally {
+      setSavingResults(false);
+    }
+  }, [sessionId, savingResults, resultsSaved]);
+
+  useEffect(() => {
+    if (isComplete && !resultsSaved && !savingResults) {
+      saveResults();
+    }
+  }, [isComplete, resultsSaved, savingResults, saveResults]);
 
   async function handleStart() {
     setStarted(true);
@@ -185,12 +218,41 @@ export function MockInterview({
           <p className="mb-2 text-sm font-medium text-[#10b981]">
             Mock interview completed!
           </p>
-          <a
-            href={`/session/${sessionId}`}
-            className="text-sm text-[#2563eb] hover:underline"
-          >
-            Back to session
-          </a>
+          {savingResults && (
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving and evaluating your answers...
+            </div>
+          )}
+          {resultsSaved && (
+            <div className="flex flex-col items-center gap-2">
+              <a
+                href={`/session/${sessionId}/results`}
+                className="text-sm text-[#2563eb] hover:underline font-medium"
+              >
+                View Results & Export PDF
+              </a>
+              <a
+                href={`/session/${sessionId}`}
+                className="text-xs text-muted-foreground hover:underline"
+              >
+                Back to session
+              </a>
+            </div>
+          )}
+          {saveError && (
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs text-muted-foreground">
+                Could not save results automatically.
+              </p>
+              <a
+                href={`/session/${sessionId}`}
+                className="text-sm text-[#2563eb] hover:underline"
+              >
+                Back to session
+              </a>
+            </div>
+          )}
         </div>
       ) : (
         <div className="border-t border-border px-4 md:px-6 py-3 bg-background shrink-0">

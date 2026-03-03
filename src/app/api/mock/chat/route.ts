@@ -40,12 +40,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Session not found" }, { status: 404 });
   }
 
+  // Fetch pre-generated questions for this session
+  const { data: questions } = await supabase
+    .from("questions")
+    .select("id, question_text, question_type")
+    .eq("session_id", sessionId)
+    .order("sort_order", { ascending: true });
+
+  // Count existing assistant messages with questions to enforce 3-4 question limit
+  const { count: assistantMsgCount } = await supabase
+    .from("mock_messages")
+    .select("*", { count: "exact", head: true })
+    .eq("session_id", sessionId)
+    .eq("role", "assistant");
+
   try {
-    const systemPrompt = buildMockInterviewSystem(
+    const questionList = (questions || []).map((q) => ({
+      id: q.id,
+      text: q.question_text,
+      type: q.question_type,
+    }));
+
+    let systemPrompt = buildMockInterviewSystem(
       session.resume_text,
       session.job_description,
-      session.job_title
+      session.job_title,
+      questionList
     );
+
+    // If 4+ assistant messages already exist, force wrap-up
+    if (assistantMsgCount && assistantMsgCount >= 4) {
+      systemPrompt += "\n\nCRITICAL: You have already asked enough questions. You MUST wrap up NOW. Do NOT ask another question. Provide your final summary and include the phrase \"Thank you for completing this mock interview\".";
+    }
 
     const modelMessages = await convertToModelMessages(messages);
 

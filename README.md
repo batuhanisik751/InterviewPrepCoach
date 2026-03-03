@@ -8,7 +8,8 @@ AI-powered interview preparation coach built with Next.js, Mistral 7B (via Ollam
 - **Answer Evaluation** — AI scores answers on clarity (25%), structure (30%), and depth (45%) with a weighted overall score, detailed feedback, and suggested stronger answers
 - **STAR Format Analysis** — Behavioral answers are checked for Situation, Task, Action, and Result components with per-component scoring
 - **Weak Point Detection** — Identifies 3-8 gaps between your resume and the job description with severity levels and coaching suggestions
-- **Mock Interviews** — Real-time streaming conversational mock interviews with AI follow-up questions
+- **Mock Interviews** — Real-time streaming conversational mock interviews with AI feedback after each answer, automatic answer saving, and evaluation
+- **PDF Export** — Export session results as a formatted PDF report with scores, feedback, and answers
 - **Dashboard & Progress Tracking** — Score trends, session history, and comprehensive results breakdowns
 - **Authentication** — Email/password auth with protected routes and row-level security
 - **PDF Resume Parsing** — Upload a PDF resume and have it automatically extracted (up to 5 MB, 15k character limit)

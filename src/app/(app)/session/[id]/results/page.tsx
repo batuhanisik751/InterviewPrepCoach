@@ -103,7 +103,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       targetSkill: q.target_skill,
       answer: answer
         ? {
-            text: answer.answer_text,
+            text: answer.user_answer,
           }
         : null,
       evaluation: evaluation

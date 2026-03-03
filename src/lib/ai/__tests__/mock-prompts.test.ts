@@ -42,7 +42,7 @@ describe("buildMockInterviewSystem", () => {
   it("instructs to wrap up after 3-4 questions", () => {
     const result = buildMockInterviewSystem("r", "j", "title");
 
-    expect(result).toContain("3-4 questions total");
+    expect(result).toContain("3 or 4 questions");
   });
 
   it("includes wrap-up signal phrase", () => {
@@ -57,10 +57,10 @@ describe("buildMockInterviewSystem", () => {
     expect(result).toContain("Can you tell me more about");
   });
 
-  it("instructs to give brief feedback after each answer", () => {
+  it("instructs to give constructive feedback after each answer", () => {
     const result = buildMockInterviewSystem("r", "j", "title");
 
-    expect(result).toContain("brief feedback");
+    expect(result).toContain("constructive feedback");
   });
 
   it("forbids simulating candidate responses", () => {
