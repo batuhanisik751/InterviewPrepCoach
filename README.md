@@ -13,6 +13,7 @@ AI-powered interview preparation coach built with Next.js, Mistral 7B (via Ollam
 - **Dashboard & Progress Tracking** — Score trends, session history, and comprehensive results breakdowns
 - **Authentication** — Email/password auth with protected routes and row-level security
 - **PDF Resume Parsing** — Upload a PDF resume and have it automatically extracted (up to 5 MB, 15k character limit)
+- **Settings & Account Management** — Edit profile name, change password, notification preferences, theme switching, and account deletion with full data cascade
 - **Theme Switching** — Light, dark, and system-preference theme modes
 - **Rate Limiting** — 20 AI calls per hour per user to prevent abuse
 
@@ -99,16 +100,25 @@ src/
 │   │   ├── session/
 │   │   │   ├── new/      # 3-step wizard: Resume → Job Description → Generate
 │   │   │   └── [id]/     # Questions, answers, mock interview, results
-│   │   └── settings/     # Profile, appearance (theme), notifications
-│   └── api/          # AI API routes (questions, evaluation, weak points, mock chat, resume parsing)
+│   │   └── settings/     # Profile, appearance (theme), notifications, account deletion
+│   └── api/
+│       ├── account/      # Account deletion (service role)
+│       ├── answers/      # Answer evaluation with AI scoring
+│       ├── mock/         # Mock interview chat (streaming), message persistence, save results
+│       ├── questions/    # AI question generation
+│       ├── resume/       # PDF resume parsing
+│       ├── sessions/     # Session CRUD
+│       └── weakpoints/   # Resume ↔ job description gap detection
 ├── components/
 │   ├── ui/           # shadcn/ui components (Button, Card, Input, Tabs, Table, Sheet, etc.)
 │   ├── layout/       # AppShell (sidebar + navbar)
-│   └── features/     # ScoreBar, StarBreakdown, WeakPointsList, MockChatBubble, ProgressChart
+│   └── features/     # ResumeInput, QuestionCard, AnswerEditor, ScoreBar, StarBreakdown,
+│                     # WeakPointsList, MockChatBubble, ProgressChart, JobDescriptionInput
 ├── lib/
 │   ├── supabase/     # Client + server Supabase utilities
-│   ├── ai/           # Ollama client, prompts, Zod schemas
+│   ├── ai/           # Ollama client, prompts, Zod schemas, scoring
 │   ├── guardrails/   # Prompt injection, content moderation, PII redaction, output consistency
+│   ├── pdf/          # PDF text extraction utility
 │   ├── rate-limit.ts # In-memory rate limiter
 │   └── utils.ts      # cn() utility (clsx + tailwind-merge)
 └── types/            # TypeScript type definitions

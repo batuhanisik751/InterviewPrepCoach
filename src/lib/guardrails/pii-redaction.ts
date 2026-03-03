@@ -8,7 +8,7 @@ const PII_PATTERNS: { type: string; placeholder: string; regex: RegExp }[] = [
   {
     type: "SSN",
     placeholder: "[SSN]",
-    regex: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
+    regex: /\b\d{3}[-\s]\d{2}[-\s]\d{4}\b/g,
   },
   {
     type: "PHONE",

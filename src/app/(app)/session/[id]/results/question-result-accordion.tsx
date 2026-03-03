@@ -56,7 +56,6 @@ interface QuestionResultAccordionProps {
 
 function QuestionResultItem({ question }: { question: QuestionData }) {
   const [expanded, setExpanded] = useState(false);
-  const [showSuggested, setShowSuggested] = useState(false);
 
   if (!question.answer || !question.evaluation) {
     return (

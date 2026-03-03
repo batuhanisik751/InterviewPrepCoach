@@ -135,7 +135,7 @@ export function ResumeInput({ value, onChange, error }: ResumeInputProps) {
               <p className="text-sm font-medium text-foreground">Upload your resume (PDF)</p>
               <p className="mt-1 text-xs text-muted-foreground">or paste it below</p>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+            <Button type="button" variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleUploadClick(); }}>
               <FileText className="h-4 w-4" />
               Choose File
             </Button>

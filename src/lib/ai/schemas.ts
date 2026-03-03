@@ -35,11 +35,6 @@ export const evaluationSchema = z.object({
     .min(0)
     .max(10)
     .describe("Depth score from 0 to 10"),
-  overall_score: z
-    .number()
-    .min(0)
-    .max(10)
-    .describe("Weighted overall score: clarity 25%, structure 30%, depth 45%"),
   feedback: z
     .string()
     .describe("2-3 sentences of constructive criticism"),
@@ -118,11 +113,6 @@ export const behavioralEvaluationSchema = z.object({
     .min(0)
     .max(10)
     .describe("Depth score from 0 to 10"),
-  overall_score: z
-    .number()
-    .min(0)
-    .max(10)
-    .describe("Weighted overall score: clarity 25%, structure 30%, depth 45%"),
   feedback: z
     .string()
     .describe("2-3 sentences of constructive criticism"),

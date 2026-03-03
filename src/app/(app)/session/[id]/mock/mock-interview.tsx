@@ -17,11 +17,13 @@ interface ExistingMessage {
 interface MockInterviewProps {
   sessionId: string;
   existingMessages: ExistingMessage[];
+  onResultsSaved?: () => void;
 }
 
 export function MockInterview({
   sessionId,
   existingMessages,
+  onResultsSaved,
 }: MockInterviewProps) {
   const [started, setStarted] = useState(existingMessages.length > 0);
   const [savingResults, setSavingResults] = useState(false);
@@ -82,6 +84,7 @@ export function MockInterview({
       if (res.ok || res.status === 409) {
         // 409 means answers already saved — treat as success
         setResultsSaved(true);
+        onResultsSaved?.();
       } else {
         setSaveError(true);
       }
@@ -90,7 +93,7 @@ export function MockInterview({
     } finally {
       setSavingResults(false);
     }
-  }, [sessionId, savingResults, resultsSaved]);
+  }, [sessionId, savingResults, resultsSaved, onResultsSaved]);
 
   useEffect(() => {
     if (isComplete && !resultsSaved && !savingResults) {

@@ -57,7 +57,10 @@ export function ProgressChart({ data }: ProgressChartProps) {
               borderRadius: "8px",
               fontSize: "12px",
             }}
-            formatter={(value?: number) => [`${(value ?? 0).toFixed(1)}/10`, "Score"]}
+            formatter={(value?: number | string) => [
+              `${Number(value ?? 0).toFixed(1)}/10`,
+              "Score",
+            ]}
           />
           <Line
             type="monotone"

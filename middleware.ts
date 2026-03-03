@@ -27,28 +27,8 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Redirect unauthenticated users away from protected routes
-  if (
-    !user &&
-    request.nextUrl.pathname.startsWith("/dashboard")
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  if (
-    !user &&
-    request.nextUrl.pathname.startsWith("/session")
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  if (
-    !user &&
-    request.nextUrl.pathname.startsWith("/history")
-  ) {
+  const protectedPrefixes = ["/dashboard", "/session", "/history", "/settings"];
+  if (!user && protectedPrefixes.some((p) => request.nextUrl.pathname.startsWith(p))) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

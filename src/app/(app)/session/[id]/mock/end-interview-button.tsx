@@ -7,22 +7,25 @@ import { Button } from "@/components/ui/button";
 
 interface EndInterviewButtonProps {
   sessionId: string;
+  resultsSaved?: boolean;
 }
 
-export function EndInterviewButton({ sessionId }: EndInterviewButtonProps) {
+export function EndInterviewButton({ sessionId, resultsSaved }: EndInterviewButtonProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
 
   async function handleEndInterview() {
+    if (resultsSaved) {
+      router.push(`/session/${sessionId}`);
+      return;
+    }
     setSaving(true);
     try {
-      // Save whatever answers have been collected so far
       await fetch("/api/mock/save-results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId }),
       });
-      // Navigate regardless of save result (409 = already saved, which is fine)
     } catch {
       // Navigate even if save fails — don't block the user
     } finally {

@@ -23,12 +23,34 @@ export default async function DashboardPage() {
   const name =
     user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
 
-  // Fetch recent sessions (last 5)
+  // Fetch recent sessions (last 5) for the list
   const { data: recentSessions } = await supabase
     .from("sessions")
     .select("id, job_title, company_name, overall_score, status, created_at")
     .order("created_at", { ascending: false })
     .limit(5);
+
+  // Fetch all-time stats
+  const { count: totalSessionCount } = await supabase
+    .from("sessions")
+    .select("*", { count: "exact", head: true });
+
+  const { count: totalCompletedCount } = await supabase
+    .from("sessions")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "completed");
+
+  const { data: allScoredSessions } = await supabase
+    .from("sessions")
+    .select("overall_score")
+    .not("overall_score", "is", null);
+
+  // Fetch completed session dates for streak calculation
+  const { data: completedDates } = await supabase
+    .from("sessions")
+    .select("created_at")
+    .eq("status", "completed")
+    .order("created_at", { ascending: false });
 
   // Fetch completed sessions for the chart (last 10)
   const { data: chartSessions } = await supabase
@@ -40,12 +62,32 @@ export default async function DashboardPage() {
     .limit(10);
 
   const sessions = recentSessions || [];
-  const completedCount = sessions.filter((s) => s.status === "completed").length;
+  const completedCount = totalCompletedCount ?? 0;
+  const scored = allScoredSessions || [];
   const avgScore =
-    sessions
-      .filter((s) => s.overall_score !== null)
-      .reduce((sum, s) => sum + (s.overall_score ?? 0), 0) /
-      (sessions.filter((s) => s.overall_score !== null).length || 1);
+    scored.length > 0
+      ? scored.reduce((sum, s) => sum + (s.overall_score ?? 0), 0) / scored.length
+      : 0;
+
+  // Calculate consecutive day streak
+  function calculateStreak(dates: { created_at: string }[]): number {
+    if (!dates || dates.length === 0) return 0;
+    const uniqueDays = new Set(
+      dates.map((d) => new Date(d.created_at).toISOString().split("T")[0])
+    );
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+    if (!uniqueDays.has(today) && !uniqueDays.has(yesterday)) return 0;
+    let streak = 0;
+    let checkDate = new Date(uniqueDays.has(today) ? today : yesterday);
+    while (uniqueDays.has(checkDate.toISOString().split("T")[0])) {
+      streak++;
+      checkDate = new Date(checkDate.getTime() - 86_400_000);
+    }
+    return streak;
+  }
+
+  const dayStreak = calculateStreak(completedDates || []);
 
   const chartData = (chartSessions || []).map((s, i) => ({
     label: s.job_title || `Session ${i + 1}`,
@@ -55,7 +97,7 @@ export default async function DashboardPage() {
   const stats = [
     {
       label: "Total Sessions",
-      value: String(sessions.length),
+      value: String(totalSessionCount ?? 0),
       icon: BarChart3,
       color: "text-[#2563eb]",
       bg: "bg-[#2563eb]/10",
@@ -76,7 +118,7 @@ export default async function DashboardPage() {
     },
     {
       label: "Day Streak",
-      value: String(completedCount > 0 ? 1 : 0),
+      value: String(dayStreak),
       icon: Flame,
       color: "text-[#ef4444]",
       bg: "bg-[#ef4444]/10",

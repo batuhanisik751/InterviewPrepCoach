@@ -63,12 +63,6 @@ Output Requirements:
 - clarity_score: Integer 0–10.
 - structure_score: Integer 0–10.
 - depth_score: Integer 0–10.
-- overall_score: You MUST calculate this exactly as (clarity_score × 0.25) + (structure_score × 0.30) + (depth_score × 0.45), rounded to one decimal. Do NOT estimate or approximate — use the formula.
-  Verification examples:
-  - clarity=8, structure=7, depth=6 → (8×0.25)+(7×0.30)+(6×0.45) = 2.00+2.10+2.70 = 6.8
-  - clarity=5, structure=5, depth=5 → 5.0
-  - clarity=9, structure=6, depth=8 → 7.7
-  - clarity=3, structure=4, depth=2 → 2.9
 - feedback: 2-4 sentences of constructive, actionable feedback. Lead with one specific strength (reference the candidate's actual words), then identify the single most impactful area for improvement with a concrete suggestion on how to fix it. This feedback is shown directly to the candidate — be honest but encouraging.
 - suggested_answer: A stronger version of the candidate's answer (150–250 words). Preserve the candidate's real experiences and details — enhance only the structure, specificity, and measurable impact. Do not fabricate experiences.
 
@@ -76,7 +70,6 @@ Rules:
 - Score based ONLY on what is explicitly stated — do not infer or assume unstated details.
 - A one-liner or vague response MUST score below 4 on Depth.
 - A well-structured answer with specific metrics and outcomes should score 7+ on Depth.
-- The overall_score MUST mathematically equal the weighted formula. Example: if clarity=7, structure=8, depth=6 → overall = (7×0.25)+(8×0.30)+(6×0.45) = 1.75+2.40+2.70 = 6.9. After computing your three scores, ALWAYS verify your overall_score by manually applying the formula before returning.
 - Be honest but encouraging — this is a coaching tool, not a rejection letter.
 - Return valid JSON matching the provided schema exactly.
 
@@ -273,7 +266,6 @@ Score on three dimensions (0-10 each):
    - 10: Quantified impact, lessons learned, exceptional detail
 
 Provide:
-- overall_score: Calculate EXACTLY as (clarity × 0.25) + (structure × 0.30) + (depth × 0.45), rounded to one decimal. Do NOT estimate — use the formula. Verify: clarity=8,structure=7,depth=6 → 6.8; clarity=9,structure=6,depth=8 → 7.7.
 - feedback: 2-3 sentences — lead with what was done well, then the single most impactful improvement area with a concrete suggestion.
 - suggested_answer: A stronger version (150-250 words) preserving the candidate's real experiences. Enhance structure, specificity, and measurable impact.
 
