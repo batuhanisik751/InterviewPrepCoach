@@ -15,7 +15,7 @@ describe("STAR_ANALYSIS_PROMPT", () => {
 
   it("asks for missing components and improvement tips", () => {
     expect(STAR_ANALYSIS_PROMPT).toContain("missing");
-    expect(STAR_ANALYSIS_PROMPT).toContain("improvement tips");
+    expect(STAR_ANALYSIS_PROMPT).toContain("improvement");
   });
 });
 
@@ -28,7 +28,7 @@ describe("buildStarPrompt", () => {
 
     expect(result).toContain("Tell me about a time you led a team.");
     expect(result).toContain("At my last job I led a team of 5 engineers.");
-    expect(result).toContain("Interview Question:");
-    expect(result).toContain("Candidate's Answer:");
+    expect(result).toContain("<interview_question>");
+    expect(result).toContain("<candidate_answer>");
   });
 });

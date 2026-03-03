@@ -15,11 +15,11 @@ describe("WEAK_POINTS_PROMPT", () => {
   it("mentions key analysis areas", () => {
     expect(WEAK_POINTS_PROMPT).toContain("skill");
     expect(WEAK_POINTS_PROMPT).toContain("severity");
-    expect(WEAK_POINTS_PROMPT).toContain("coaching suggestion");
+    expect(WEAK_POINTS_PROMPT).toContain("coaching tip");
   });
 
   it("asks for JD requirement quote", () => {
-    expect(WEAK_POINTS_PROMPT).toContain("JD requirement");
+    expect(WEAK_POINTS_PROMPT).toContain("jd_requirement");
   });
 
   it("mentions ATS screening", () => {
@@ -36,7 +36,7 @@ describe("buildWeakPointsPrompt", () => {
 
     expect(result).toContain("5 years of JavaScript experience");
     expect(result).toContain("Looking for a senior Python developer");
-    expect(result).toContain("Resume:");
-    expect(result).toContain("Job Description:");
+    expect(result).toContain("<resume>");
+    expect(result).toContain("<job_description>");
   });
 });

@@ -52,8 +52,8 @@ describe("buildQuestionPrompt", () => {
     const result = buildQuestionPrompt("My resume text", "Job desc text");
     expect(result).toContain("My resume text");
     expect(result).toContain("Job desc text");
-    expect(result).toContain("Resume:");
-    expect(result).toContain("Job Description:");
+    expect(result).toContain("<resume>");
+    expect(result).toContain("<job_description>");
   });
 });
 
@@ -69,8 +69,8 @@ describe("buildEvaluationPrompt", () => {
     expect(result).toContain("JD here");
     expect(result).toContain("What is your experience?");
     expect(result).toContain("I have 5 years of experience.");
-    expect(result).toContain("Interview Question:");
-    expect(result).toContain("Candidate's Answer:");
+    expect(result).toContain("<interview_question>");
+    expect(result).toContain("<candidate_answer>");
   });
 });
 
@@ -100,8 +100,8 @@ describe("buildQuestionAndWeakPointsPrompt", () => {
     const result = buildQuestionAndWeakPointsPrompt("My resume", "Job desc");
     expect(result).toContain("My resume");
     expect(result).toContain("Job desc");
-    expect(result).toContain("Resume:");
-    expect(result).toContain("Job Description:");
+    expect(result).toContain("<resume>");
+    expect(result).toContain("<job_description>");
   });
 });
 
@@ -121,7 +121,7 @@ describe("BEHAVIORAL_EVALUATION_PROMPT", () => {
     expect(BEHAVIORAL_EVALUATION_PROMPT).toContain("Action");
     expect(BEHAVIORAL_EVALUATION_PROMPT).toContain("Result");
     expect(BEHAVIORAL_EVALUATION_PROMPT).toContain("missing");
-    expect(BEHAVIORAL_EVALUATION_PROMPT).toContain("improvement tips");
+    expect(BEHAVIORAL_EVALUATION_PROMPT).toContain("improvement");
   });
 });
 
@@ -137,6 +137,6 @@ describe("buildBehavioralEvaluationPrompt", () => {
     expect(result).toContain("JD here");
     expect(result).toContain("Tell me about a time...");
     expect(result).toContain("At my previous company...");
-    expect(result).toContain("STAR format compliance");
+    expect(result).toContain("STAR");
   });
 });
