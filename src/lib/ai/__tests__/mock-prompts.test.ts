@@ -39,10 +39,10 @@ describe("buildMockInterviewSystem", () => {
     expect(result).toContain("ONE question per message");
   });
 
-  it("instructs to wrap up after 3-4 questions", () => {
+  it("includes pre-selected questions section", () => {
     const result = buildMockInterviewSystem("r", "j", "title");
 
-    expect(result).toContain("3 or 4");
+    expect(result).toContain("PRE-SELECTED QUESTIONS");
   });
 
   it("includes wrap-up signal phrase", () => {
@@ -51,16 +51,16 @@ describe("buildMockInterviewSystem", () => {
     expect(result).toContain("Thank you for completing this mock interview");
   });
 
-  it("instructs to probe for specifics", () => {
+  it("includes final message instructions with reflection", () => {
     const result = buildMockInterviewSystem("r", "j", "title");
 
-    expect(result).toContain("Can you walk me through");
+    expect(result).toContain("Interview Reflection");
   });
 
-  it("instructs to give constructive feedback after each answer", () => {
+  it("includes security instruction for user data", () => {
     const result = buildMockInterviewSystem("r", "j", "title");
 
-    expect(result).toContain("constructive feedback");
+    expect(result).toContain("IMPORTANT SECURITY INSTRUCTION");
   });
 
   it("forbids simulating candidate responses", () => {

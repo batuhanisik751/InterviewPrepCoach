@@ -16,6 +16,15 @@ AI-powered interview preparation coach built with Next.js, Mistral 7B (via Ollam
 - **Theme Switching** — Light, dark, and system-preference theme modes
 - **Rate Limiting** — 20 AI calls per hour per user to prevent abuse
 
+## Security & Guardrails
+
+All AI interactions are protected by four layers of guardrails:
+
+- **Prompt Injection Defense** — User inputs are scanned and sanitized to remove instruction-like patterns (e.g., "ignore previous instructions", closing XML tags, role injection). System prompts include explicit input fencing that tells the model to treat user data as opaque text.
+- **Content Moderation** — Inputs and outputs are filtered for hate speech, threats, sexual content, and profanity using pattern-based detection with a domain-aware allowlist (e.g., "penetration testing" and "offensive coordinator" are not flagged).
+- **PII Detection & Redaction** — Resume text is automatically scanned for phone numbers, email addresses, SSNs, street addresses, and dates of birth. Detected PII is replaced with placeholders (e.g., `[PHONE]`, `[EMAIL]`) before storage.
+- **Output Consistency** — AI-generated questions, evaluations, and suggested answers are validated for relevance (do they reference the source material?), length compliance, and score quality (uniform scores are flagged).
+
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router, TypeScript)
@@ -99,6 +108,7 @@ src/
 ├── lib/
 │   ├── supabase/     # Client + server Supabase utilities
 │   ├── ai/           # Ollama client, prompts, Zod schemas
+│   ├── guardrails/   # Prompt injection, content moderation, PII redaction, output consistency
 │   ├── rate-limit.ts # In-memory rate limiter
 │   └── utils.ts      # cn() utility (clsx + tailwind-merge)
 └── types/            # TypeScript type definitions

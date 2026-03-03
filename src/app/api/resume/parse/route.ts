@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { PDFParse } from "pdf-parse";
+import { redactPII } from "@/lib/guardrails";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_MIME_TYPE = "application/pdf";
@@ -64,11 +65,16 @@ export async function POST(request: Request) {
     }
 
     const truncated = text.length > MAX_EXTRACTED_LENGTH;
+    const extractedText = text.slice(0, MAX_EXTRACTED_LENGTH);
+
+    // PII redaction
+    const piiResult = redactPII(extractedText);
 
     return NextResponse.json({
-      text: text.slice(0, MAX_EXTRACTED_LENGTH),
+      text: piiResult.redactedText,
       truncated,
       originalLength: text.length,
+      piiRedacted: piiResult.piiDetected,
     });
   } catch {
     return NextResponse.json(

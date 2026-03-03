@@ -5,6 +5,7 @@ import { questionsWithWeakPointsSchema } from "@/lib/ai/schemas";
 import { QUESTION_AND_WEAKPOINTS_PROMPT, buildQuestionAndWeakPointsPrompt } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { validateQuestionRelevance } from "@/lib/guardrails";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -70,6 +71,16 @@ export async function POST(request: Request) {
       prompt: buildQuestionAndWeakPointsPrompt(session.resume_text, session.job_description),
       system: QUESTION_AND_WEAKPOINTS_PROMPT,
     });
+
+    // Output consistency check (log issues but don't block)
+    const questionConsistency = validateQuestionRelevance(
+      object.questions,
+      session.resume_text,
+      session.job_description
+    );
+    if (!questionConsistency.passed) {
+      console.warn("Question relevance issues:", questionConsistency.issues);
+    }
 
     // Insert questions into the database
     const questionsToInsert = object.questions.map((q, index) => ({

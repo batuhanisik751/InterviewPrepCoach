@@ -10,6 +10,7 @@ import {
 } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
 import { calculateOverallScore } from "@/lib/ai/scoring";
+import { validateEvaluationOutput } from "@/lib/guardrails";
 
 interface QAPair {
   mockQuestion: string;
@@ -281,6 +282,15 @@ export async function POST(request: Request) {
             object.depth_score
           ),
         };
+      }
+
+      // Output consistency check (log issues but don't block)
+      const consistencyCheck = validateEvaluationOutput(evaluation, userAnswer);
+      if (!consistencyCheck.passed) {
+        console.warn(
+          `Output consistency issues for question ${question.id}:`,
+          consistencyCheck.issues
+        );
       }
 
       // Save evaluation

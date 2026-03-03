@@ -4,6 +4,7 @@ import { openai } from "@/lib/ai/openai";
 import { buildMockInterviewSystem } from "@/lib/ai/prompts";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { rejectIfInjection, moderateContent } from "@/lib/guardrails";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -28,6 +29,31 @@ export async function POST(request: Request) {
 
   if (!sessionId) {
     return NextResponse.json({ error: "Session ID required" }, { status: 400 });
+  }
+
+  // Guardrails: check last user message for injection and inappropriate content
+  if (messages && messages.length > 0) {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.role === "user") {
+      const content =
+        typeof lastMsg.content === "string" ? lastMsg.content : "";
+
+      const injection = rejectIfInjection(content);
+      if (injection.rejected) {
+        return NextResponse.json(
+          { error: "Your message contains disallowed content." },
+          { status: 400 }
+        );
+      }
+
+      const moderation = moderateContent(content);
+      if (moderation.severity === "block") {
+        return NextResponse.json(
+          { error: "Your message contains inappropriate content." },
+          { status: 400 }
+        );
+      }
+    }
   }
 
   const { data: session } = await supabase

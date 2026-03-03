@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { scanForInjection, moderateContent, redactPII } from "@/lib/guardrails";
 
 const createSessionSchema = z.object({
   resumeText: z
@@ -38,12 +39,36 @@ export async function POST(request: Request) {
 
   const { resumeText, jobDescription, jobTitle, companyName } = parsed.data;
 
+  // Content moderation
+  const resumeModeration = moderateContent(resumeText);
+  if (resumeModeration.severity === "block") {
+    return NextResponse.json(
+      { error: "Resume text contains inappropriate content and cannot be processed." },
+      { status: 400 }
+    );
+  }
+
+  const jdModeration = moderateContent(jobDescription);
+  if (jdModeration.severity === "block") {
+    return NextResponse.json(
+      { error: "Job description contains inappropriate content and cannot be processed." },
+      { status: 400 }
+    );
+  }
+
+  // Prompt injection sanitization
+  const resumeInjection = scanForInjection(resumeText);
+  const jdInjection = scanForInjection(jobDescription);
+
+  // PII redaction (resume only)
+  const piiResult = redactPII(resumeInjection.sanitized);
+
   const { data: session, error } = await supabase
     .from("sessions")
     .insert({
       user_id: user.id,
-      resume_text: resumeText,
-      job_description: jobDescription,
+      resume_text: piiResult.redactedText,
+      job_description: jdInjection.sanitized,
       job_title: jobTitle || null,
       company_name: companyName || null,
       status: "draft",

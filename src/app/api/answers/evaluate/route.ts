@@ -11,6 +11,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { calculateOverallScore } from "@/lib/ai/scoring";
+import { scanForInjection, moderateContent, validateEvaluationOutput } from "@/lib/guardrails";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -40,6 +41,19 @@ export async function POST(request: Request) {
     );
   }
 
+  // Content moderation
+  const answerModeration = moderateContent(userAnswer);
+  if (answerModeration.severity === "block") {
+    return NextResponse.json(
+      { error: "Your answer contains inappropriate content." },
+      { status: 400 }
+    );
+  }
+
+  // Prompt injection sanitization
+  const injectionResult = scanForInjection(userAnswer);
+  const sanitizedAnswer = injectionResult.sanitized;
+
   // Fetch the question and its parent session
   const { data: question } = await supabase
     .from("questions")
@@ -55,12 +69,12 @@ export async function POST(request: Request) {
   const isBehavioral = question.question_type === "behavioral";
 
   try {
-    // Save the user's answer
+    // Save the user's answer (sanitized)
     const { data: answer, error: answerError } = await supabase
       .from("answers")
       .insert({
         question_id: questionId,
-        user_answer: userAnswer,
+        user_answer: sanitizedAnswer,
       })
       .select("id")
       .single();
@@ -85,7 +99,7 @@ export async function POST(request: Request) {
           session.resume_text,
           session.job_description,
           question.question_text,
-          userAnswer
+          sanitizedAnswer
         ),
         system: BEHAVIORAL_EVALUATION_PROMPT,
       });
@@ -125,7 +139,7 @@ export async function POST(request: Request) {
           session.resume_text,
           session.job_description,
           question.question_text,
-          userAnswer
+          sanitizedAnswer
         ),
         system: ANSWER_EVALUATION_PROMPT,
       });
@@ -137,6 +151,12 @@ export async function POST(request: Request) {
           object.depth_score
         ),
       };
+    }
+
+    // Output consistency check (log issues but don't block)
+    const consistencyCheck = validateEvaluationOutput(evaluation, sanitizedAnswer);
+    if (!consistencyCheck.passed) {
+      console.warn("Evaluation consistency issues:", consistencyCheck.issues);
     }
 
     // Save evaluation with STAR data
