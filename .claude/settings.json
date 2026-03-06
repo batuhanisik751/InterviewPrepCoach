@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if git diff --name-only --diff-filter=ACMR 2>/dev/null | grep -qE '^src/.*\\.(ts|tsx)$'; then echo 'REMINDER: Source files were modified. Use the post-change subagent before finishing (tests, README/gitignore check, commit message).'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

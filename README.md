@@ -88,9 +88,26 @@ npm run test:watch # Run tests in watch mode
 
 No AI API key needed — Mistral 7B runs locally via Ollama.
 
+## Claude Code Integration
+
+This project includes [Claude Code](https://claude.com/claude-code) configuration for AI-assisted development:
+
+- **`CLAUDE.md`** — Project conventions and instructions loaded every session
+- **`.claude/agents/`** — Specialized subagents:
+  - `codebase-researcher` — Explores the codebase and reports findings (uses Haiku for speed)
+  - `security-reviewer` — Reviews code for vulnerabilities, PII leaks, and auth issues
+  - `post-change` — Automatically writes/runs tests, updates docs, and suggests commit messages after code changes
+- **`.claude/settings.json`** — Hook that reminds Claude to run the post-change agent when source files are modified
+
 ## Project Structure
 
 ```
+.claude/
+├── agents/
+│   ├── codebase-researcher.md
+│   ├── post-change.md
+│   └── security-reviewer.md
+└── settings.json        # Hooks config
 src/
 ├── app/
 │   ├── (auth)/       # Login, signup, OAuth callback

@@ -53,8 +53,10 @@ next-env.d.ts
 *.swp
 *.swo
 
-# Claude Code
-.claude/
+# Claude Code — track shared config, ignore local state
+.claude/*
+!.claude/agents/
+!.claude/settings.json
 
 # Figma exports
 Complete_user_request/
